@@ -8,23 +8,22 @@ import {
   filterFarmsByQuery,
   buildContactMailto,
 } from "../../src/lib/homepage.mjs";
+import * as homepage from "../../src/lib/homepage.mjs";
 
-test("prefers popular farms and limits the list to three", () => {
+test("includes trending and popular-category farms but excludes unrelated farms", () => {
   const farms = [
-    { id: "1", category: "other" },
-    { id: "2", category: "popular" },
-    { id: "3", category: "popular" },
-    { id: "4", category: "popular" },
-    { id: "5", category: "popular" },
+    { id: "trending", is_trending: true, category: "other" },
+    { id: "popular", category: "popular" },
+    { id: "unrelated", category: "other" },
   ];
 
   assert.deepEqual(
     getPopularFarms(farms).map((farm) => farm.id),
-    ["2", "3", "4"],
+    ["trending", "popular"],
   );
 });
 
-test("falls back to the first three farms when none are categorized popular", () => {
+test("does not label unrelated farms as popular when no farm is popular", () => {
   const farms = [
     { id: "1", category: "other" },
     { id: "2", category: "other" },
@@ -32,11 +31,31 @@ test("falls back to the first three farms when none are categorized popular", ()
     { id: "4", category: "other" },
   ];
 
+  assert.deepEqual(getPopularFarms(farms), []);
+  assert.deepEqual(getPopularFarms([]), []);
+});
+
+test("matches wet and dry season using season or category without excluding other sections", () => {
+  const farms = [
+    { id: "wet-season", season: "Wet Season", category: "popular", is_trending: true },
+    { id: "wet-category", season: "year-round", category: "WET season" },
+    { id: "dry-season", season: "Dry Season", category: "" },
+    { id: "dry-category", season: "", category: "dry season" },
+    { id: "unrelated", season: "year-round", category: "popular" },
+  ];
+
+  assert.deepEqual(
+    homepage.getWetSeasonFarms?.(farms).map((farm) => farm.id) ?? [],
+    ["wet-season", "wet-category"],
+  );
+  assert.deepEqual(
+    homepage.getDrySeasonFarms?.(farms).map((farm) => farm.id) ?? [],
+    ["dry-season", "dry-category"],
+  );
   assert.deepEqual(
     getPopularFarms(farms).map((farm) => farm.id),
-    ["1", "2", "3"],
+    ["wet-season", "unrelated"],
   );
-  assert.deepEqual(getPopularFarms([]), []);
 });
 
 test("selects trending or headline farms and falls back when none are featured", () => {

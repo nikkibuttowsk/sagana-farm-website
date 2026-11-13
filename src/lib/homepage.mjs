@@ -1,8 +1,18 @@
 const FARM_IMAGE_FALLBACK = "/farm-placeholder.svg";
-const MAX_POPULAR_FARMS = 3;
+const MAX_FEATURED_FALLBACKS = 3;
 
 function asFarmList(farms) {
   return Array.isArray(farms) ? farms : [];
+}
+
+function containsLabel(value, label) {
+  const values = Array.isArray(value) ? value : [value];
+
+  return values.some(
+    (item) =>
+      typeof item === "string" &&
+      item.toLowerCase().includes(label),
+  );
 }
 
 function numericCoordinate(value) {
@@ -18,9 +28,28 @@ function numericCoordinate(value) {
 }
 
 export function getPopularFarms(farms) {
-  const list = asFarmList(farms);
-  const popular = list.filter((farm) => farm?.category === "popular");
-  return (popular.length > 0 ? popular : list).slice(0, MAX_POPULAR_FARMS);
+  return asFarmList(farms).filter(
+    (farm) =>
+      farm?.is_trending === true ||
+      (typeof farm?.category === "string" &&
+        farm.category.trim().toLowerCase() === "popular"),
+  );
+}
+
+export function getWetSeasonFarms(farms) {
+  return asFarmList(farms).filter(
+    (farm) =>
+      containsLabel(farm?.season, "wet") ||
+      containsLabel(farm?.category, "wet"),
+  );
+}
+
+export function getDrySeasonFarms(farms) {
+  return asFarmList(farms).filter(
+    (farm) =>
+      containsLabel(farm?.season, "dry") ||
+      containsLabel(farm?.category, "dry"),
+  );
 }
 
 export function getFeaturedFarms(farms) {
@@ -30,7 +59,7 @@ export function getFeaturedFarms(farms) {
       farm?.is_trending ||
       (typeof farm?.headline === "string" && farm.headline.trim().length > 0),
   );
-  return featured.length > 0 ? featured : list.slice(0, MAX_POPULAR_FARMS);
+  return featured.length > 0 ? featured : list.slice(0, MAX_FEATURED_FALLBACKS);
 }
 
 export function getLocatedFarms(farms) {

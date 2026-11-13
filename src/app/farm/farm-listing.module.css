@@ -1,0 +1,130 @@
+.section {
+  margin-top: 2.5rem;
+}
+
+.sectionTitle {
+  margin-bottom: 1rem;
+  color: #1d472f;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1rem;
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid #dce5dc;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0.5rem 1.5rem rgb(35 49 38 / 6%);
+}
+
+.cardLink {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink:focus-visible,
+.backLink:focus-visible {
+  outline: 3px solid #286343;
+  outline-offset: 3px;
+}
+
+.thumbnail,
+.detailImage {
+  position: relative;
+  overflow: hidden;
+  background: #edf3ed;
+}
+
+.thumbnail {
+  aspect-ratio: 16 / 10;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.cardContent {
+  padding: 1rem 1.2rem 1.2rem;
+}
+
+.cardContent h3 {
+  margin: 0 0 0.65rem;
+  color: #24543a;
+  font-size: 1.2rem;
+}
+
+.cardContent p {
+  margin: 0.35rem 0 0;
+  color: #536457;
+  line-height: 1.5;
+}
+
+.card:hover {
+  border-color: #9dbba3;
+  box-shadow: 0 0.75rem 1.75rem rgb(35 49 38 / 11%);
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #24543a;
+  font-weight: 650;
+}
+
+.detail {
+  overflow: hidden;
+  padding: 0 0 1.5rem;
+  border: 1px solid #dce5dc;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0.5rem 1.5rem rgb(35 49 38 / 6%);
+}
+
+.detailImage {
+  aspect-ratio: 16 / 9;
+}
+
+.detailTitle {
+  margin: 1.5rem 1.5rem 1rem;
+  color: #1d472f;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+}
+
+.metadata {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 1rem;
+  margin: 0 1.5rem 1.5rem;
+}
+
+.metadata div {
+  padding: 0.9rem;
+  border-radius: 0.65rem;
+  background: #f0f7f0;
+}
+
+.metadata dt {
+  margin-bottom: 0.3rem;
+  color: #536457;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.metadata dd {
+  margin: 0;
+  color: #233126;
+  font-weight: 600;
+}
+
+.detail > p {
+  margin: 0 1.5rem;
+  color: #536457;
+  line-height: 1.65;
+}
