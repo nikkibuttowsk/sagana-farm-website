@@ -1,0 +1,852 @@
+#sagana-homepage {
+  --color-primary: #173d2b;
+  --color-primary-dark: #102d20;
+  --color-secondary: #39744c;
+  --color-tertiary: #e8f2e4;
+  --text: #26372b;
+  --muted: #657369;
+  --white: #fff;
+  --page-padding: clamp(1rem, 6vw, 5.5rem);
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  color: var(--text);
+  background: var(--white);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  line-height: 1.55;
+}
+
+#sagana-homepage *,
+#sagana-homepage *::before,
+#sagana-homepage *::after {
+  box-sizing: border-box;
+}
+
+#sagana-homepage img {
+  display: block;
+  max-width: 100%;
+}
+
+#sagana-homepage a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#sagana-homepage button,
+#sagana-homepage input,
+#sagana-homepage textarea {
+  font: inherit;
+}
+
+#sagana-homepage ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#sagana-homepage :focus-visible {
+  outline: 3px solid #79a984;
+  outline-offset: 3px;
+}
+
+#sagana-homepage .skip-link {
+  position: absolute;
+  z-index: 20;
+  top: -4rem;
+  left: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  color: var(--white);
+  background: var(--color-primary);
+}
+
+#sagana-homepage .skip-link:focus {
+  top: 1rem;
+}
+
+#sagana-homepage #site-header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem 2rem;
+  padding: 1.15rem var(--page-padding);
+  background: var(--white);
+  box-shadow: 0 2px 12px rgb(23 61 43 / 7%);
+}
+
+#sagana-homepage #site-header > a:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--color-primary);
+  font-size: 1.15rem;
+  font-weight: 750;
+}
+
+#sagana-homepage #logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#sagana-homepage #site-header nav {
+  margin-left: auto;
+}
+
+#sagana-homepage #site-header nav ul,
+#sagana-homepage #site-footer nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+#sagana-homepage #site-header nav a {
+  color: var(--color-primary);
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+#sagana-homepage #site-header nav a:hover,
+#sagana-homepage #site-footer nav a:hover {
+  color: var(--color-secondary);
+}
+
+#sagana-homepage .farm-search form {
+  position: relative;
+  display: flex;
+}
+
+#sagana-homepage .farm-search label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+#sagana-homepage .farm-search input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.6rem 3.5rem 0.6rem 1rem;
+  border: 1px solid #d5e0d3;
+  border-radius: 999px;
+  color: var(--text);
+  background: #f5f8f3;
+}
+
+#sagana-homepage .farm-search button {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  min-height: 2.15rem;
+  padding: 0 0.8rem;
+  border: 0;
+  border-radius: 999px;
+  color: var(--white);
+  background: var(--color-primary);
+  cursor: pointer;
+}
+
+#sagana-homepage #site-header .farm-search {
+  width: min(100%, 16rem);
+}
+
+#sagana-homepage main {
+  flex: 1;
+}
+
+#sagana-homepage #hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 1.25rem 3rem;
+  padding: clamp(3rem, 7vw, 6.5rem) var(--page-padding);
+  background:
+    radial-gradient(ellipse at 80% 8%, rgb(206 230 193 / 58%), transparent 28rem),
+    linear-gradient(135deg, #f3f8ef, #eaf3e5);
+}
+
+#sagana-homepage .hero-content {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  max-width: 37rem;
+}
+
+#sagana-homepage .eyebrow {
+  margin: 0 0 0.65rem;
+  color: var(--color-secondary);
+  font-size: 0.76rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+#sagana-homepage .hero-content h1 {
+  max-width: 12ch;
+  margin: 0 0 1rem;
+  color: var(--color-primary-dark);
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  line-height: 1.05;
+}
+
+#sagana-homepage .hero-content > p:not(.eyebrow) {
+  max-width: 34rem;
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+  font-size: 1.08rem;
+}
+
+#sagana-homepage #hero > .farm-search {
+  grid-column: 2;
+  grid-row: 1;
+  width: min(100%, 30rem);
+}
+
+#sagana-homepage .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.7rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 700;
+  text-align: center;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+#sagana-homepage .btn:hover {
+  transform: translateY(-1px);
+}
+
+#sagana-homepage .btn-primary {
+  color: var(--white);
+  background: var(--color-primary);
+}
+
+#sagana-homepage .btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+#sagana-homepage .btn-secondary {
+  color: var(--color-primary-dark);
+  background: #dcebd5;
+}
+
+#sagana-homepage .btn-secondary:hover {
+  background: #cfe2c6;
+}
+
+#sagana-homepage .btn-outline {
+  border-color: #b6cdb5;
+  color: var(--color-primary);
+  background: transparent;
+}
+
+#sagana-homepage .btn-sm {
+  min-height: 2.25rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+#sagana-homepage .btn-lg {
+  min-height: 3rem;
+  padding: 0.8rem 1.35rem;
+}
+
+#sagana-homepage .news-carousel {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid #e0e9dc;
+  border-radius: 1.15rem;
+  background: var(--white);
+  box-shadow: 0 1rem 2.5rem rgb(24 58 35 / 9%);
+}
+
+#sagana-homepage .carousel-badge {
+  display: inline-block;
+  margin-bottom: 0.85rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  color: var(--color-primary);
+  background: var(--color-tertiary);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+}
+
+#sagana-homepage .news-slide {
+  display: none;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem;
+}
+
+#sagana-homepage .news-slide.active {
+  display: grid;
+}
+
+#sagana-homepage .slide-media,
+#sagana-homepage .farm-card-media {
+  position: relative;
+  overflow: hidden;
+  background: #eaf3e5;
+}
+
+#sagana-homepage .slide-media {
+  min-height: 14rem;
+  border-radius: 0.8rem;
+}
+
+#sagana-homepage .farm-card-media {
+  height: 11rem;
+}
+
+#sagana-homepage .farm-image {
+  object-fit: cover;
+}
+
+#sagana-homepage .news-caption .news-tag {
+  color: var(--color-secondary);
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#sagana-homepage .news-caption h3 {
+  margin: 0.35rem 0 0.55rem;
+  color: var(--color-primary-dark);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.25;
+}
+
+#sagana-homepage .summary-text {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+#sagana-homepage .news-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5ece2;
+}
+
+#sagana-homepage .farm-source {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+#sagana-homepage .carousel-nav-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+#sagana-homepage .carousel-btn {
+  width: 2.3rem;
+  height: 2.3rem;
+  border: 1px solid #c8d8c6;
+  border-radius: 50%;
+  color: var(--color-primary);
+  background: var(--white);
+  cursor: pointer;
+}
+
+#sagana-homepage .carousel-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+#sagana-homepage .content-section {
+  padding: clamp(3rem, 6vw, 5rem) var(--page-padding);
+}
+
+#sagana-homepage .section-header-flex {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+#sagana-homepage .section-header-flex h2,
+#sagana-homepage .map-header h2,
+#sagana-homepage .about-section h2,
+#sagana-homepage .contact-section h2 {
+  margin: 0;
+  color: var(--color-primary-dark);
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  line-height: 1.15;
+}
+
+#sagana-homepage .farm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+#sagana-homepage .farm-card {
+  overflow: hidden;
+  border: 1px solid #e1e9de;
+  border-radius: 1rem;
+  background: var(--white);
+  box-shadow: 0 0.6rem 1.6rem rgb(24 58 35 / 6%);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+#sagana-homepage .farm-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.9rem 2rem rgb(24 58 35 / 11%);
+}
+
+#sagana-homepage .farm-card a {
+  display: block;
+  height: 100%;
+}
+
+#sagana-homepage .card-info {
+  padding: 1rem 1.1rem 1.2rem;
+}
+
+#sagana-homepage .card-info h3 {
+  margin: 0 0 0.25rem;
+  color: var(--color-primary-dark);
+  font-size: 1.1rem;
+}
+
+#sagana-homepage .card-info .location {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+#sagana-homepage .card-info .tag {
+  display: inline-flex;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  color: var(--color-primary);
+  background: var(--color-tertiary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+#sagana-homepage .view-all-container {
+  margin-top: 1.75rem;
+  text-align: center;
+}
+
+#sagana-homepage .empty-state,
+#sagana-homepage .map-empty,
+#sagana-homepage .map-error {
+  padding: 1rem;
+  border: 1px solid #dce8d9;
+  border-radius: 0.8rem;
+  color: var(--muted);
+  background: #f7faf5;
+}
+
+#sagana-homepage .cta-banner {
+  padding: 2.5rem var(--page-padding);
+  color: var(--white);
+  background: var(--color-primary);
+}
+
+#sagana-homepage .cta-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  max-width: 82rem;
+  margin: 0 auto;
+}
+
+#sagana-homepage .cta-banner .eyebrow {
+  color: #b9d8b8;
+}
+
+#sagana-homepage .cta-text h2 {
+  max-width: 32rem;
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.15;
+}
+
+#sagana-homepage .cta-text p:last-child {
+  max-width: 42rem;
+  margin: 0;
+  color: #e0eadf;
+}
+
+#sagana-homepage .map-container-section {
+  padding: clamp(3rem, 6vw, 5rem) var(--page-padding);
+  background: #f7faf5;
+}
+
+#sagana-homepage .map-header {
+  max-width: 48rem;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+}
+
+#sagana-homepage .map-header > p:last-child {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+}
+
+#sagana-homepage .leaflet-map {
+  width: 100%;
+  height: 30rem;
+  border: 1px solid #dce8d9;
+  border-radius: 1rem;
+  background: #eaf3e5;
+  box-shadow: 0 0.7rem 1.8rem rgb(24 58 35 / 8%);
+  z-index: 1;
+}
+
+#sagana-homepage .farm-map-marker-container {
+  border: 0;
+  background: transparent;
+}
+
+#sagana-homepage .farm-map-marker {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  place-items: center;
+  border: 2px solid var(--white);
+  border-radius: 50%;
+  color: var(--white);
+  background: var(--color-secondary);
+  box-shadow: 0 2px 6px rgb(16 45 32 / 40%);
+  font-size: 0.8rem;
+}
+
+#sagana-homepage .map-popup-card h4 {
+  margin: 0 0 0.3rem;
+  color: var(--color-primary);
+  font-size: 1rem;
+}
+
+#sagana-homepage .map-popup-card p {
+  margin: 0 0 0.65rem;
+  color: #4b5c4d;
+  font-size: 0.85rem;
+}
+
+#sagana-homepage .map-popup-card a {
+  display: inline-block;
+  margin-right: 0.4rem;
+  color: var(--color-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+#sagana-homepage .about-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 3rem;
+}
+
+#sagana-homepage .about-copy > p:last-child {
+  max-width: 32rem;
+  color: var(--muted);
+}
+
+#sagana-homepage .team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+#sagana-homepage .team-card {
+  padding: 1rem;
+  border: 1px solid #e1e9de;
+  border-radius: 1rem;
+  background: #fbfcfa;
+  text-align: center;
+}
+
+#sagana-homepage .team-avatar {
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 0.8rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-primary);
+  background: var(--color-tertiary);
+  font-weight: 800;
+}
+
+#sagana-homepage .team-card h3 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+}
+
+#sagana-homepage .team-card p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+#sagana-homepage .contact-section {
+  padding: clamp(3rem, 6vw, 5rem) var(--page-padding);
+  background: #f3f7f0;
+}
+
+#sagana-homepage .contact-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.8fr);
+  gap: 2rem;
+  max-width: 82rem;
+  margin: 0 auto;
+}
+
+#sagana-homepage .contact-info > p:not(.eyebrow) {
+  max-width: 38rem;
+  color: var(--muted);
+}
+
+#sagana-homepage .contact-methods {
+  margin: 1.25rem 0;
+}
+
+#sagana-homepage .contact-methods p {
+  margin: 0.35rem 0;
+}
+
+#sagana-homepage .contact-methods a {
+  color: var(--color-secondary);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+#sagana-homepage .simple-form {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 36rem;
+  margin-top: 1.5rem;
+}
+
+#sagana-homepage .form-group {
+  display: grid;
+  gap: 0.35rem;
+}
+
+#sagana-homepage .form-group label {
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+#sagana-homepage .form-group input,
+#sagana-homepage .form-group textarea {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #cbd9c8;
+  border-radius: 0.6rem;
+  color: var(--text);
+  background: var(--white);
+}
+
+#sagana-homepage .form-group textarea {
+  resize: vertical;
+}
+
+#sagana-homepage .simple-form > .btn {
+  justify-self: start;
+  cursor: pointer;
+}
+
+#sagana-homepage .form-notice:empty {
+  display: none;
+}
+
+#sagana-homepage .form-notice {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+#sagana-homepage .owner-cta-card {
+  align-self: start;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid #dce8d9;
+  border-radius: 1rem;
+  background: var(--white);
+  box-shadow: 0 0.8rem 2rem rgb(24 58 35 / 7%);
+}
+
+#sagana-homepage .cta-badge {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  color: var(--color-primary);
+  background: var(--color-tertiary);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#sagana-homepage .owner-cta-card h2 {
+  margin-bottom: 0.75rem;
+}
+
+#sagana-homepage .owner-cta-card > p {
+  color: var(--muted);
+}
+
+#sagana-homepage .benefit-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 1.25rem 0;
+}
+
+#sagana-homepage .benefit-list li {
+  position: relative;
+  padding-left: 1.6rem;
+}
+
+#sagana-homepage .benefit-list li::before {
+  position: absolute;
+  left: 0;
+  color: var(--color-secondary);
+  content: "✓";
+  font-weight: 800;
+}
+
+#sagana-homepage .full-width {
+  width: 100%;
+}
+
+#sagana-homepage #site-footer {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 2rem var(--page-padding);
+  color: #e6efe5;
+  background: var(--color-primary-dark);
+  text-align: center;
+}
+
+#sagana-homepage #site-footer nav ul {
+  justify-content: center;
+}
+
+#sagana-homepage #site-footer nav a,
+#sagana-homepage #site-footer nav span,
+#sagana-homepage #site-footer address a {
+  color: #e6efe5;
+  font-size: 0.9rem;
+}
+
+#sagana-homepage #site-footer address {
+  font-style: normal;
+}
+
+#sagana-homepage #site-footer p {
+  margin: 0;
+  color: #bfd0be;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 64rem) {
+  #sagana-homepage #site-header {
+    gap: 1rem;
+  }
+
+  #sagana-homepage #site-header nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  #sagana-homepage .farm-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #sagana-homepage .about-section {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  #sagana-homepage #hero {
+    grid-template-columns: 1fr;
+  }
+
+  #sagana-homepage .hero-content,
+  #sagana-homepage #hero > .farm-search,
+  #sagana-homepage .news-carousel {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  #sagana-homepage .hero-content {
+    max-width: none;
+  }
+
+  #sagana-homepage .news-slide {
+    grid-template-columns: 1fr;
+  }
+
+  #sagana-homepage .slide-media {
+    min-height: 12rem;
+  }
+
+  #sagana-homepage .farm-grid,
+  #sagana-homepage .team-grid,
+  #sagana-homepage .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #sagana-homepage .section-header-flex,
+  #sagana-homepage .cta-container {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  #sagana-homepage .contact-grid {
+    gap: 1.25rem;
+  }
+
+  #sagana-homepage .leaflet-map {
+    height: 24rem;
+  }
+}
+
+@media (max-width: 32rem) {
+  #sagana-homepage #site-header .farm-search {
+    order: 4;
+    width: 100%;
+  }
+
+  #sagana-homepage #site-header nav ul {
+    gap: 0.55rem 0.85rem;
+  }
+
+  #sagana-homepage .news-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
