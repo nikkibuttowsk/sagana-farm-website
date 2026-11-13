@@ -6,12 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test",
+    "test:integration": "node --test tests/integration"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.109.0",
+    "leaflet": "^1.9.4",
     "next": "16.4.6",
+    "qrcode": "^1.5.4",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "ws": "^8.23.0"
   },
   "devDependencies": {
     "babel-plugin-react-compiler": "1.0.0",

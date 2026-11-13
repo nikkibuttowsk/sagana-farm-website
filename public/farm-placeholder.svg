@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img">
+  <rect width="640" height="360" fill="#eaf3e5"/>
+  <circle cx="500" cy="82" r="36" fill="#f3c76b"/>
+  <path d="M0 260c115-66 205-55 320 0s205 66 320 0v100H0z" fill="#8dbb75"/>
+  <path d="M0 300c125-44 245-25 355 15s185 36 285-2v47H0z" fill="#4e8a55"/>
+  <path d="m250 207 70-52 70 52v78H250z" fill="#d58c59"/>
+  <path d="m232 211 88-68 88 68-14 17-74-57-74 57z" fill="#77563e"/>
+  <rect x="278" y="225" width="32" height="60" rx="2" fill="#f6e5c7"/>
+  <rect x="329" y="222" width="40" height="34" rx="2" fill="#b9d8df"/>
+  <path d="M90 275c4-48 21-74 48-82 27 8 44 34 48 82m-48-82v81m-37-49 37 25m37-25-37 25" fill="none" stroke="#396f43" stroke-linecap="round" stroke-width="8"/>
+  <text x="320" y="332" fill="#244d32" font-family="Arial, sans-serif" font-size="18" text-anchor="middle">A local farm experience</text>
+</svg>
