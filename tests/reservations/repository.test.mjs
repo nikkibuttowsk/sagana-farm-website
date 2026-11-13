@@ -9,6 +9,7 @@ import {
   getActiveTimeSlots,
   getApprovedTicket,
 } from "../../src/lib/reservations/repository.mjs";
+import * as repository from "../../src/lib/reservations/repository.mjs";
 import { hashToken } from "../../src/lib/reservations/tokens.mjs";
 
 const farmId = "9d08750e-f7cb-4951-9c68-4f5b88af2e39";
@@ -114,8 +115,41 @@ test("selectsHomepageMetadataForActiveFarms", async () => {
 
   assert.equal(
     client.calls[0].columns,
-    "id,name,description,location,max_party_size,province,category,crops,headline,news_summary,is_trending,images,latitude,longitude",
+    "id,name,description,location,max_party_size,province,category,crops,headline,news_summary,is_trending,images,latitude,longitude,season",
   );
+});
+
+test("loads one active farm by ID and returns null for an inactive or missing farm", async () => {
+  const activeFarm = { ...farm, province: "Rizal", season: "Wet Season" };
+  const client = createSupabaseFake([
+    { data: activeFarm, error: null },
+    { data: null, error: null },
+  ]);
+  const getFarmById = repository.getActiveFarmById;
+
+  const result = await getFarmById?.(client, farmId);
+  const missingFarm = await getFarmById?.(client, "inactive-farm");
+
+  assert.equal(result?.id, farmId);
+  assert.equal(result?.season, "Wet Season");
+  assert.equal(missingFarm, null);
+  assert.deepEqual(client.calls[0].filters, [
+    ["id", "eq", farmId],
+    ["is_active", "eq", true],
+  ]);
+});
+
+test("surfaces errors when loading one active farm by ID", async () => {
+  const error = new Error("database unavailable");
+  const client = createSupabaseFake([{ data: null, error }]);
+  const getFarmById = repository.getActiveFarmById;
+
+  assert.equal(typeof getFarmById, "function");
+  if (!getFarmById) {
+    return;
+  }
+
+  await assert.rejects(getFarmById(client, farmId), error);
 });
 
 test("listsOnlyActiveSlotsForTheSelectedFarm", async () => {

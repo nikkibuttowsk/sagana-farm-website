@@ -1,12 +1,19 @@
 import { connection } from "next/server";
 import Link from "next/link";
+import FarmThumbnail from "../components/FarmThumbnail";
 import SetupNotice from "../components/SetupNotice";
 import SiteHeader from "../components/SiteHeader";
 import { ServerConfigurationError } from "@/lib/config/env.mjs";
-import { filterFarmsByQuery } from "@/lib/homepage.mjs";
+import {
+  filterFarmsByQuery,
+  getDrySeasonFarms,
+  getPopularFarms,
+  getWetSeasonFarms,
+} from "@/lib/homepage.mjs";
 import { getActiveFarms } from "@/lib/reservations/repository.mjs";
 import { createPublicSupabaseClient } from "@/lib/supabase/clients.mjs";
-import styles from "../reservation/reservation.module.css";
+import pageStyles from "../reservation/reservation.module.css";
+import styles from "./farm-listing.module.css";
 
 export const instant = false;
 
@@ -38,17 +45,22 @@ export default async function FarmPage({ searchParams }) {
   }
 
   const visibleFarms = filterFarmsByQuery(farms, query);
+  const sections = [
+    { title: "Popular", farms: getPopularFarms(visibleFarms) },
+    { title: "Wet Season", farms: getWetSeasonFarms(visibleFarms) },
+    { title: "Dry Season", farms: getDrySeasonFarms(visibleFarms) },
+  ];
 
   return (
-    <div className={styles.site}>
+    <div className={pageStyles.site}>
       <SiteHeader />
-      <main className={styles.main}>
-        <section className={styles.hero}>
+      <main className={pageStyles.main}>
+        <section className={pageStyles.hero}>
           <h1>Find your farm visit</h1>
           <p>Choose a Sagana farm and send a visit request for administrator review.</p>
         </section>
-        <form className={styles.form} action="/farm" method="get" role="search">
-          <div className={styles.field}>
+        <form className={pageStyles.form} action="/farm" method="get" role="search">
+          <div className={pageStyles.field}>
             <label htmlFor="farm-search">Search farms</label>
             <input
               id="farm-search"
@@ -58,40 +70,60 @@ export default async function FarmPage({ searchParams }) {
               defaultValue={query}
             />
           </div>
-          <div className={styles.actions}>
-            <button className={styles.button} type="submit">
+          <div className={pageStyles.actions}>
+            <button className={pageStyles.button} type="submit">
               Search
             </button>
             {query && <Link href="/farm">Clear search</Link>}
           </div>
         </form>
         {query && (
-          <p className={styles.notice}>
+          <p className={pageStyles.notice}>
             Search results for <strong>{query}</strong>
           </p>
         )}
         {visibleFarms.length === 0 ? (
-          <p className={styles.notice}>
+          <p className={pageStyles.notice}>
             {query
               ? `No farms match "${query}".`
               : "No farms are currently accepting visits."}
           </p>
         ) : (
-          <div className={styles.grid}>
-            {visibleFarms.map((farm) => (
-              <article className={styles.card} key={farm.id}>
-                <h2>{farm.name}</h2>
-                {farm.location && <p>{farm.location}</p>}
-                {farm.description && <p>{farm.description}</p>}
-                <Link
-                  className={styles.button}
-                  href={`/reservation?farmId=${encodeURIComponent(farm.id)}`}
-                >
-                  Reserve a visit
-                </Link>
-              </article>
-            ))}
-          </div>
+          sections.map((section) => (
+            <section className={styles.section} key={section.title}>
+              <h2 className={styles.sectionTitle}>{section.title}</h2>
+              {section.farms.length === 0 ? (
+                <p className={pageStyles.notice}>
+                  No farms are currently listed in this category.
+                </p>
+              ) : (
+                <div className={styles.grid}>
+                  {section.farms.map((farm) => (
+                    <article className={styles.card} key={farm.id}>
+                      <Link
+                        className={styles.cardLink}
+                        href={`/farms/${encodeURIComponent(String(farm.id))}`}
+                      >
+                        <div className={styles.thumbnail}>
+                          <FarmThumbnail
+                            className={styles.image}
+                            farm={farm}
+                            sizes="(max-width: 40rem) 100vw, (max-width: 70rem) 50vw, 33vw"
+                          />
+                        </div>
+                        <div className={styles.cardContent}>
+                          <h3>{farm.name}</h3>
+                          <p>{farm.location || "Location not provided"}</p>
+                          <p>{farm.province || "Province not provided"}</p>
+                          <p>{farm.season || "Season not specified"}</p>
+                        </div>
+                      </Link>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          ))
         )}
       </main>
     </div>

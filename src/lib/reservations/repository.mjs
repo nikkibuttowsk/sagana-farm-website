@@ -24,7 +24,7 @@ export async function getActiveFarms(client) {
   const { data, error } = await client
     .from("farms")
     .select(
-      "id,name,description,location,max_party_size,province,category,crops,headline,news_summary,is_trending,images,latitude,longitude",
+      "id,name,description,location,max_party_size,province,category,crops,headline,news_summary,is_trending,images,latitude,longitude,season",
     )
     .eq("is_active", true)
     .order("name", { ascending: true });
@@ -34,6 +34,21 @@ export async function getActiveFarms(client) {
   if (!Array.isArray(data)) {
     throw new Error("Supabase returned an invalid farm list.");
   }
+
+  return data;
+}
+
+export async function getActiveFarmById(client, farmId) {
+  const { data, error } = await client
+    .from("farms")
+    .select(
+      "id,name,description,location,province,category,is_trending,images,season",
+    )
+    .eq("id", farmId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  throwOnError(error);
 
   return data;
 }
