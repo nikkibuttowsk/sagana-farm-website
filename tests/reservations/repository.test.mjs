@@ -139,6 +139,21 @@ test("loads one active farm by ID and returns null for an inactive or missing fa
   ]);
 });
 
+test("selectsEveryFarmDetailFieldForActiveFarmById", async () => {
+  const client = createSupabaseFake([{ data: farm, error: null }]);
+
+  await repository.getActiveFarmById(client, farmId);
+
+  assert.equal(
+    client.calls[0].columns,
+    "id,name,description,location,province,category,is_trending,images,season,bearing_season,video_url,crops,hours,entrance_fee,activities",
+  );
+  assert.deepEqual(client.calls[0].filters, [
+    ["id", "eq", farmId],
+    ["is_active", "eq", true],
+  ]);
+});
+
 test("surfaces errors when loading one active farm by ID", async () => {
   const error = new Error("database unavailable");
   const client = createSupabaseFake([{ data: null, error }]);

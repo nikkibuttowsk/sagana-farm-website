@@ -27,6 +27,32 @@ function numericCoordinate(value) {
   return Number.isFinite(coordinate) ? coordinate : null;
 }
 
+function safeFarmAssetUrl(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const assetPath = value.trim();
+  if (/^https:\/\//i.test(assetPath) && URL.canParse(assetPath)) {
+    return new URL(assetPath).href;
+  }
+
+  if (assetPath.startsWith("//") || !/^[A-Za-z0-9._/-]+$/.test(assetPath)) {
+    return null;
+  }
+
+  const localPath = assetPath.replace(/^\/+/, "");
+  if (
+    !localPath ||
+    localPath.split("/").includes("..") ||
+    localPath.endsWith("/")
+  ) {
+    return null;
+  }
+
+  return `/${localPath}`;
+}
+
 export function getPopularFarms(farms) {
   return asFarmList(farms).filter(
     (farm) =>
@@ -82,32 +108,65 @@ export function getFarmImageUrl(farm) {
   const candidates = Array.isArray(farm?.images) ? farm.images : [farm?.images];
 
   for (const candidate of candidates) {
-    if (typeof candidate !== "string") {
-      continue;
+    const imageUrl = safeFarmAssetUrl(candidate);
+    if (imageUrl) {
+      return imageUrl;
     }
-
-    const imagePath = candidate.trim();
-    if (/^https:\/\//i.test(imagePath) && URL.canParse(imagePath)) {
-      return new URL(imagePath).href;
-    }
-
-    if (imagePath.startsWith("//") || !/^[A-Za-z0-9._/-]+$/.test(imagePath)) {
-      continue;
-    }
-
-    const localPath = imagePath.replace(/^\/+/, "");
-    if (
-      !localPath ||
-      localPath.split("/").includes("..") ||
-      localPath.endsWith("/")
-    ) {
-      continue;
-    }
-
-    return `/${localPath}`;
   }
 
   return FARM_IMAGE_FALLBACK;
+}
+
+export function getFarmImageUrls(farm) {
+  const candidates = Array.isArray(farm?.images) ? farm.images : [farm?.images];
+
+  return candidates
+    .map(safeFarmAssetUrl)
+    .filter((imageUrl) => imageUrl && imageUrl !== FARM_IMAGE_FALLBACK);
+}
+
+export function getFarmVideoUrl(value) {
+  return safeFarmAssetUrl(value);
+}
+
+export function formatFarmDetailValue(value) {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? String(value) : "";
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(formatFarmDetailValue).filter(Boolean).join(", ");
+  }
+
+  if (
+    value &&
+    typeof value === "object" &&
+    (Object.getPrototypeOf(value) === Object.prototype ||
+      Object.getPrototypeOf(value) === null)
+  ) {
+    return Object.entries(value)
+      .map(([key, item]) => {
+        const formattedValue = formatFarmDetailValue(item);
+        return formattedValue ? `${key}: ${formattedValue}` : "";
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+
+  return "";
+}
+
+export function appendFarmChatMessage(messages, text, id) {
+  const trimmedText = typeof text === "string" ? text.trim() : "";
+  if (!trimmedText) {
+    return messages;
+  }
+
+  return [...messages, { id, text: trimmedText }];
 }
 
 export function filterFarmsByQuery(farms, query) {

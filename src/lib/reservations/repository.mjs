@@ -42,7 +42,7 @@ export async function getActiveFarmById(client, farmId) {
   const { data, error } = await client
     .from("farms")
     .select(
-      "id,name,description,location,province,category,is_trending,images,season",
+      "id,name,description,location,province,category,is_trending,images,season,bearing_season,video_url,crops,hours,entrance_fee,activities",
     )
     .eq("id", farmId)
     .eq("is_active", true)
