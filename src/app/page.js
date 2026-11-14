@@ -253,12 +253,10 @@ export default async function HomePage() {
                 <li>Online booking and email notifications</li>
                 <li>Share your farm location with visitors</li>
               </ul>
-              <a
-                href="mailto:sagana077@gmail.com?subject=Farm%20partnership%20inquiry"
-                className="btn btn-secondary btn-lg full-width"
-              >
+              <Link
+                href="/farm/register" className="btn btn-secondary btn-lg full-width">
                 Register your farm now &rarr;
-              </a>
+              </Link>
             </aside>
           </div>
         </section>

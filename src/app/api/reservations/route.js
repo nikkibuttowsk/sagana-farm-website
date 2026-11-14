@@ -1,4 +1,8 @@
-import { createEmailClient, sendAdminReservationEmail } from "@/lib/email/client.mjs";
+import {
+  createEmailClient,
+  sendAdminReservationEmail,
+  sendVisitorPendingEmail,
+} from "@/lib/email/client.mjs";
 import { requireServerEnv } from "@/lib/config/env.mjs";
 import {
   getTrustedClientIp,
@@ -62,6 +66,8 @@ export async function POST(request) {
         email: {
           sendAdminReservationEmail: (reservation, urls) =>
             sendAdminReservationEmail(reservation, urls, createEmailClient()),
+          sendVisitorPendingEmail: (reservation) =>
+            sendVisitorPendingEmail(reservation, createEmailClient()),
         },
         createOpaqueToken,
         appBaseUrl,

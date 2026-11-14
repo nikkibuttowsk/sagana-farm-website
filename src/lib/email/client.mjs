@@ -4,6 +4,7 @@ import { requireServerEnv } from "../config/env.mjs";
 import { createBrevoEmailClient } from "./brevo.mjs";
 import {
   createAdminReservationMessage,
+  createVisitorPendingMessage,
   createVisitorStatusMessage,
 } from "./templates.mjs";
 
@@ -35,6 +36,17 @@ export async function sendAdminReservationEmail(
     retryUrl,
     from: RESERVATION_FROM_EMAIL,
     to: FARM_ADMIN_EMAIL,
+  });
+
+  await sendMessage(emailClient, message);
+}
+
+export async function sendVisitorPendingEmail(reservation, emailClient) {
+  const { RESERVATION_FROM_EMAIL } = requireServerEnv([
+    "RESERVATION_FROM_EMAIL",
+  ]);
+  const message = createVisitorPendingMessage(reservation, {
+    from: RESERVATION_FROM_EMAIL,
   });
 
   await sendMessage(emailClient, message);

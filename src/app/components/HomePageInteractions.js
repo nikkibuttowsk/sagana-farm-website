@@ -55,10 +55,10 @@ function createMapPopup(farm, latitude, longitude) {
   const details = document.createElement("p");
   details.textContent = `Location: ${farm.location || farm.province || "Philippines"}; Crops: ${formatCrops(farm.crops)}`;
 
-  const reserveLink = document.createElement("a");
-  reserveLink.className = "btn-popup";
-  reserveLink.href = `/reservation?farmId=${encodeURIComponent(String(farm.id ?? ""))}`;
-  reserveLink.textContent = "Reserve a visit";
+  const detailsLink = document.createElement("a");
+  detailsLink.className = "btn-popup";
+  detailsLink.href = `/farms/${encodeURIComponent(String(farm.id ?? ""))}`;
+  detailsLink.textContent = "View farm details";
 
   const directionsLink = document.createElement("a");
   directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
@@ -66,7 +66,7 @@ function createMapPopup(farm, latitude, longitude) {
   directionsLink.target = "_blank";
   directionsLink.textContent = "Get directions";
 
-  popup.append(heading, details, reserveLink, document.createTextNode(" "), directionsLink);
+  popup.append(heading, details, detailsLink, document.createTextNode(" "), directionsLink);
   return popup;
 }
 
@@ -116,9 +116,9 @@ export function FarmCarousel({ farms }) {
                   </span>
                   <Link
                     className="btn btn-sm btn-primary"
-                    href={`/reservation?farmId=${encodeURIComponent(String(farm.id))}`}
+                    href={`/farms/${encodeURIComponent(String(farm.id))}`}
                   >
-                    Read story &amp; book a visit
+                    View farm details
                   </Link>
                 </div>
               </div>
@@ -161,7 +161,7 @@ export function PopularFarmGrid({ farms }) {
     <div className="farm-grid">
       {farms.map((farm) => (
         <article className="farm-card" key={farm.id}>
-          <Link href={`/reservation?farmId=${encodeURIComponent(String(farm.id))}`}>
+          <Link href={`/farms/${encodeURIComponent(String(farm.id))}`}>
             <div className="farm-card-media">
               <FarmImage farm={farm} sizes="(max-width: 768px) 100vw, 33vw" />
             </div>
