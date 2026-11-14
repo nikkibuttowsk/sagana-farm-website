@@ -108,6 +108,80 @@ test("uses supported image URLs and falls back for missing or unsafe paths", () 
   assert.equal(getFarmImageUrl({ images: [] }), "/farm-placeholder.svg");
 });
 
+test("returns ordered safe farm gallery URLs without placeholders", () => {
+  assert.deepEqual(
+    homepage.getFarmImageUrls?.({
+      images: [
+        "javascript:alert(1)",
+        "https://cdn.example.com/one.jpg",
+        "/images/two.jpg",
+        "//example.com/unsafe.jpg",
+        "data:image/png;base64,abc",
+        "/farm-placeholder.svg",
+        "images/../private.jpg",
+      ],
+    }),
+    ["https://cdn.example.com/one.jpg", "/images/two.jpg"],
+  );
+  assert.deepEqual(
+    homepage.getFarmImageUrls?.({ images: "images/single.jpg" }),
+    ["/images/single.jpg"],
+  );
+  assert.deepEqual(homepage.getFarmImageUrls?.({}), []);
+});
+
+test("accepts only safe direct farm video URLs", () => {
+  assert.equal(homepage.getFarmVideoUrl?.(undefined), null);
+  assert.equal(
+    homepage.getFarmVideoUrl?.("https://cdn.example.com/walkthrough.mp4"),
+    "https://cdn.example.com/walkthrough.mp4",
+  );
+  assert.equal(
+    homepage.getFarmVideoUrl?.("/videos/walkthrough.webm"),
+    "/videos/walkthrough.webm",
+  );
+  for (const unsafeUrl of [
+    "javascript:alert(1)",
+    "data:video/mp4,abc",
+    "//example.com/walkthrough.mp4",
+    "http://example.com/walkthrough.mp4",
+  ]) {
+    assert.equal(homepage.getFarmVideoUrl?.(unsafeUrl), null);
+  }
+});
+
+test("formats farm detail strings arrays objects and empty values", () => {
+  assert.equal(homepage.formatFarmDetailValue?.("  Rizal  "), "Rizal");
+  assert.equal(homepage.formatFarmDetailValue?.(0), "0");
+  assert.equal(
+    homepage.formatFarmDetailValue?.([" Mango ", "", 2]),
+    "Mango, 2",
+  );
+  assert.equal(
+    homepage.formatFarmDetailValue?.({
+      adults: 4,
+      children: ["2", "3"],
+      note: " ",
+    }),
+    "adults: 4; children: 2, 3",
+  );
+  assert.equal(homepage.formatFarmDetailValue?.("  "), "");
+  assert.equal(homepage.formatFarmDetailValue?.(null), "");
+});
+
+test("appends only trimmed non-empty local chat messages", () => {
+  const messages = [{ id: "existing", text: "Hello" }];
+
+  assert.equal(
+    homepage.appendFarmChatMessage?.(messages, " \n ", "ignored"),
+    messages,
+  );
+  assert.deepEqual(
+    homepage.appendFarmChatMessage?.(messages, "  Let's visit!  ", "new"),
+    [...messages, { id: "new", text: "Let's visit!" }],
+  );
+});
+
 test("filters farms by name, description, location, province, and crops", () => {
   const farms = [
     { id: "name", name: "Golden Mango" },
