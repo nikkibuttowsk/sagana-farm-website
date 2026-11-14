@@ -29,16 +29,27 @@ export async function submitReservation(input, deps) {
     { token: retryToken.token },
   );
 
+  let notificationSent = false;
+
   try {
     await deps.email.sendAdminReservationEmail(reservation, {
       actionUrl,
       retryUrl,
     });
-    return { reference: reservation.id, notificationSent: true };
+    notificationSent = true;
   } catch (error) {
     reportError(deps, error, "Could not send admin reservation email.");
-    return { reference: reservation.id, notificationSent: false };
   }
+
+  if (typeof deps.email.sendVisitorPendingEmail === "function") {
+    try {
+      await deps.email.sendVisitorPendingEmail(reservation);
+    } catch (error) {
+      reportError(deps, error, "Could not send visitor pending receipt email.");
+    }
+  }
+
+  return { reference: reservation.id, notificationSent };
 }
 
 export async function handleReservationDecision({ token, decision }, deps) {

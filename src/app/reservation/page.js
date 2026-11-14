@@ -7,7 +7,10 @@ import {
   getActiveFarms,
   getActiveTimeSlots,
 } from "@/lib/reservations/repository.mjs";
-import { createPublicSupabaseClient } from "@/lib/supabase/clients.mjs";
+import {
+  createAdminSupabaseClient,
+  createPublicSupabaseClient,
+} from "@/lib/supabase/clients.mjs";
 import ReservationForm from "./ReservationForm";
 import styles from "./reservation.module.css";
 
@@ -27,6 +30,40 @@ function getManilaToday() {
   }).format(new Date());
 }
 
+const DEFAULT_SLOT_TEMPLATES = [
+  { label: "08:00 - 10:00", sort_order: 1 },
+  { label: "10:00 - 12:00", sort_order: 2 },
+  { label: "13:00 - 15:00", sort_order: 3 },
+  { label: "15:00 - 17:00", sort_order: 4 },
+];
+
+async function ensureFarmTimeSlots(publicClient, farm) {
+  const existing = await getActiveTimeSlots(publicClient, farm.id);
+  if (existing.length > 0) {
+    return existing;
+  }
+
+  try {
+    const adminClient = createAdminSupabaseClient();
+    const rows = DEFAULT_SLOT_TEMPLATES.map((slot) => ({
+      farm_id: farm.id,
+      label: slot.label,
+      sort_order: slot.sort_order,
+      is_active: true,
+    }));
+
+    const { error } = await adminClient.from("farm_time_slots").insert(rows);
+    if (!error) {
+      return await getActiveTimeSlots(publicClient, farm.id);
+    }
+    console.error("Could not auto-seed farm_time_slots:", error);
+  } catch (err) {
+    console.error("Admin client unavailable for auto-seeding time slots:", err);
+  }
+
+  return existing;
+}
+
 export default async function ReservationPage({ searchParams }) {
   await connection();
   const params = await searchParams;
@@ -39,7 +76,7 @@ export default async function ReservationPage({ searchParams }) {
     const slotEntries = await Promise.all(
       farms.map(async (farm) => [
         farm.id,
-        await getActiveTimeSlots(client, farm.id),
+        await ensureFarmTimeSlots(client, farm),
       ]),
     );
     slotsByFarm = Object.fromEntries(slotEntries);
@@ -57,20 +94,27 @@ export default async function ReservationPage({ searchParams }) {
   }
 
   const catalog = buildFarmCatalogView(farms, slotsByFarm);
+  const rawFarmMap = Object.fromEntries(farms.map((f) => [f.id, f]));
+  const enrichedCatalog = catalog.map((item) => ({
+    ...item,
+    location:
+      rawFarmMap[item.id]?.location ||
+      rawFarmMap[item.id]?.province ||
+      "Philippines",
+    imageUrl: Array.isArray(rawFarmMap[item.id]?.images)
+      ? rawFarmMap[item.id].images[0]
+      : typeof rawFarmMap[item.id]?.images === "string" &&
+          rawFarmMap[item.id].images.trim()
+        ? rawFarmMap[item.id].images.trim()
+        : "/farm-placeholder.svg",
+  }));
 
   return (
     <div className={styles.site}>
       <SiteHeader />
       <main className={styles.main}>
-        <section className={styles.hero}>
-          <h1>Request a farm visit</h1>
-          <p>
-            Choose a farm, date, and time. Your request is confirmed after the
-            farm administrator reviews availability.
-          </p>
-        </section>
         <ReservationForm
-          farms={catalog}
+          farms={enrichedCatalog}
           initialFarmId={params?.farmId ?? ""}
           minDate={getManilaToday()}
         />
