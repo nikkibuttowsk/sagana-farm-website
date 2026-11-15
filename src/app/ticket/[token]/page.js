@@ -47,32 +47,60 @@ export default async function TicketPage({ params }) {
     }
   }
 
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(token)}`;
+
   return (
     <div className={styles.site}>
       <SiteHeader />
       <main className={`${styles.main} ${styles.ticket}`}>
         {ticket ? (
-          <>
-            <section className={styles.hero}>
+          <div className={styles.wrapper}>
+            <header className={`${styles.stepHeader} ${styles.centerHeader}`}>
+              <span className={styles.statusPill}>Approved &bull; Official Pass</span>
               <h1>Farm visit ticket</h1>
-              <p>Show this ticket when you arrive at the farm.</p>
-            </section>
+              <p>Present this digital pass when you arrive at the farm.</p>
+            </header>
+
             <article className={styles.card}>
-              <p>
-                <strong>Approved</strong>
-              </p>
-              <dl>
-                <dt>Farm</dt>
-                <dd>{ticket.farmName}</dd>
-                <dt>Date</dt>
-                <dd>{formatManilaDate(ticket.visitDate)}</dd>
-                <dt>Time</dt>
-                <dd>{ticket.timeSlotLabel}</dd>
-                <dt>Guests</dt>
-                <dd>{ticket.guestCount}</dd>
-              </dl>
+              <div style={{ textAlign: "center", padding: "0.75rem 0 1.25rem" }}>
+                <img
+                  src={qrUrl}
+                  alt="Farm visit check-in QR code"
+                  width={190}
+                  height={190}
+                  style={{
+                    display: "inline-block",
+                    borderRadius: "0.75rem",
+                    border: "1px solid #dfe6dc",
+                    padding: "0.5rem",
+                    background: "#ffffff",
+                  }}
+                />
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.82rem", color: "#5c6b5f" }}>
+                  Scan at the farm gate for check-in
+                </p>
+              </div>
+
+              <div className={styles.ticketDetails}>
+                <div className={styles.ticketRow}>
+                  <span>Farm</span>
+                  <strong>{ticket.farmName}</strong>
+                </div>
+                <div className={styles.ticketRow}>
+                  <span>Date</span>
+                  <strong>{formatManilaDate(ticket.visitDate)}</strong>
+                </div>
+                <div className={styles.ticketRow}>
+                  <span>Time</span>
+                  <strong>{ticket.timeSlotLabel}</strong>
+                </div>
+                <div className={styles.ticketRow}>
+                  <span>Guests</span>
+                  <strong>{ticket.guestCount}</strong>
+                </div>
+              </div>
             </article>
-          </>
+          </div>
         ) : (
           <section className={styles.notice} role="status">
             This ticket is unavailable. It may be invalid, expired, or not

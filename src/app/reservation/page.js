@@ -114,6 +114,7 @@ export default async function ReservationPage({ searchParams }) {
       <SiteHeader />
       <main className={styles.main}>
         <ReservationForm
+          key={`${params?.farmId ?? "default"}-${crypto.randomUUID()}`}
           farms={enrichedCatalog}
           initialFarmId={params?.farmId ?? ""}
           minDate={getManilaToday()}

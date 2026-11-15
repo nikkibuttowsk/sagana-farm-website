@@ -194,6 +194,10 @@ export function createVisitorStatusMessage(
     ? `Visit Approved! Your QR Ticket for ${reservation.farm_name}`
     : `Update on your visit request for ${reservation.farm_name}`;
 
+  const qrImageSrc = ticketUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(ticketUrl)}`
+    : qrDataUrl;
+
   const text = [
     `Hello ${reservation.visitor_name},`,
     `Your reservation for ${reservation.farm_name} on ${reservation.visit_date} at ${reservation.time_slot_label} is ${status}.`,
@@ -218,9 +222,9 @@ export function createVisitorStatusMessage(
         ["Status", "Approved"],
       ])}
       ${
-        qrDataUrl
+        qrImageSrc
           ? `<div style="margin:18px 0;padding:20px;background-color:#f8faf7;border:1.5px dashed #c6d4c7;border-radius:12px;text-align:center;">
-              <img alt="Farm visit ticket QR code" src="${escapeHtml(qrDataUrl)}" width="180" height="180" style="display:block;margin:0 auto 10px;border-radius:8px;" />
+              <img alt="Farm visit ticket QR code" src="${escapeHtml(qrImageSrc)}" width="180" height="180" style="display:block;margin:0 auto 10px;border-radius:8px;" />
               <p style="margin:0;font-size:12px;color:#5c6b5f;">Scan at the farm entrance for quick check-in</p>
             </div>`
           : ""

@@ -102,6 +102,28 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
     setViewMonth(next.getUTCMonth());
   }
 
+  function resetForm() {
+    setStep(1);
+    setFarmId(
+      farms.some((farm) => farm.id === initialFarmId)
+        ? initialFarmId
+        : farms[0]?.id ?? "",
+    );
+    setViewYear(initialParsed.year);
+    setViewMonth(initialParsed.month);
+    setVisitDate(minDate || "");
+    setTimeSlotId("");
+    setAdults(1);
+    setChildren(0);
+    setVisitorName("");
+    setVisitorEmail("");
+    setVisitorPhone("");
+    setWebsite("");
+    setErrors({});
+    setNotice(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function handleContinueStep1() {
     const stepErrors = {};
     if (!farmId) stepErrors.farmId = "Please select a farm.";
@@ -109,7 +131,10 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
     if (!timeSlotId) stepErrors.timeSlotId = "Please choose a time slot.";
     if (totalGuests < 1) {
       stepErrors.guestCount = "At least 1 guest is required.";
-    } else if (selectedFarm?.maxPartySize && totalGuests > selectedFarm.maxPartySize) {
+    } else if (
+      selectedFarm?.maxPartySize &&
+      totalGuests > selectedFarm.maxPartySize
+    ) {
       stepErrors.guestCount = `Maximum ${selectedFarm.maxPartySize} guests per reservation.`;
     }
 
@@ -491,8 +516,8 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
               <div className={styles.farmMeta}>
                 <h2 className={styles.farmTitle}>{selectedFarm?.name}</h2>
                 <p className={styles.farmLocation}>
-                  {formatReadableDate(visitDate)} &bull;{" "}
-                  {selectedSlot?.label} &bull; {totalGuests}{" "}
+                  {formatReadableDate(visitDate)} &bull; {selectedSlot?.label}{" "}
+                  &bull; {totalGuests}{" "}
                   {totalGuests === 1 ? "guest" : "guests"}
                 </p>
               </div>
@@ -507,9 +532,25 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
           </section>
 
           {/* Guest Details Form */}
-          <form onSubmit={handleSubmit} noValidate>
+          <form onSubmit={handleSubmit} noValidate autoComplete="off">
             <section className={styles.card}>
-              <h3 className={styles.cardHeading}>Guest details</h3>
+              <div className={styles.cardTopRow}>
+                <h3 className={styles.cardHeading}>Guest details</h3>
+                {(visitorName || visitorEmail || visitorPhone) && (
+                  <button
+                    type="button"
+                    className={styles.editBtn}
+                    onClick={() => {
+                      setVisitorName("");
+                      setVisitorEmail("");
+                      setVisitorPhone("");
+                      setErrors({});
+                    }}
+                  >
+                    Clear fields
+                  </button>
+                )}
+              </div>
 
               <div className={styles.honeypot} aria-hidden="true">
                 <label htmlFor="website">Leave this field empty</label>
@@ -530,6 +571,7 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
                   id="visitorName"
                   name="visitorName"
                   type="text"
+                  autoComplete="off"
                   placeholder="Juan dela Cruz"
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
@@ -545,7 +587,7 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
                   id="visitorEmail"
                   name="visitorEmail"
                   type="email"
-                  autoComplete="email"
+                  autoComplete="off"
                   placeholder="juan@example.com"
                   value={visitorEmail}
                   onChange={(e) => setVisitorEmail(e.target.value)}
@@ -561,7 +603,7 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
                   id="visitorPhone"
                   name="visitorPhone"
                   type="tel"
-                  autoComplete="tel"
+                  autoComplete="off"
                   placeholder="+63 917 123 4567"
                   value={visitorPhone}
                   onChange={(e) => setVisitorPhone(e.target.value)}
@@ -658,8 +700,29 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
             </div>
           </section>
 
-          <div className={styles.confirmationActions}>
-            <Link href="/" className={styles.primaryCta}>
+          <div
+            className={styles.confirmationActions}
+            style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+          >
+            <button
+              type="button"
+              className={styles.primaryCta}
+              onClick={resetForm}
+            >
+              Book another reservation
+            </button>
+            <Link
+              href="/"
+              className={styles.secondaryButton}
+              style={{
+                display: "block",
+                textAlign: "center",
+                padding: "0.9rem 1.25rem",
+                borderRadius: "0.75rem",
+                textDecoration: "none",
+                fontWeight: 600,
+              }}
+            >
               Back to home
             </Link>
           </div>
