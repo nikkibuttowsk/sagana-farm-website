@@ -16,6 +16,7 @@ import {
   FarmMap,
   PopularFarmGrid,
 } from "./components/HomePageInteractions";
+import NearbyFarmsSection from "./components/NearbyFarmsSection";
 
 export const instant = false;
 
@@ -140,6 +141,10 @@ export default async function HomePage() {
           </div>
 
           <PopularFarmGrid farms={popularFarms} />
+
+          <div style={{ marginTop: "3rem" }}>
+            <NearbyFarmsSection farms={farms} radiusKm={100} />
+          </div>
 
           <div className="view-all-container">
             <Link href="/farm" className="btn btn-primary btn-lg">
