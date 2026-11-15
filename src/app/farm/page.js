@@ -3,6 +3,7 @@ import Link from "next/link";
 import FarmThumbnail from "../components/FarmThumbnail";
 import SetupNotice from "../components/SetupNotice";
 import SiteHeader from "../components/SiteHeader";
+import NearbyFarmsSection from "../components/NearbyFarmsSection";
 import { ServerConfigurationError } from "@/lib/config/env.mjs";
 import {
   filterFarmsByQuery,
@@ -89,41 +90,44 @@ export default async function FarmPage({ searchParams }) {
               : "No farms are currently accepting visits."}
           </p>
         ) : (
-          sections.map((section) => (
-            <section className={styles.section} key={section.title}>
-              <h2 className={styles.sectionTitle}>{section.title}</h2>
-              {section.farms.length === 0 ? (
-                <p className={pageStyles.notice}>
-                  No farms are currently listed in this category.
-                </p>
-              ) : (
-                <div className={styles.grid}>
-                  {section.farms.map((farm) => (
-                    <article className={styles.card} key={farm.id}>
-                      <Link
-                        className={styles.cardLink}
-                        href={`/farms/${encodeURIComponent(String(farm.id))}`}
-                      >
-                        <div className={styles.thumbnail}>
-                          <FarmThumbnail
-                            className={styles.image}
-                            farm={farm}
-                            sizes="(max-width: 40rem) 100vw, (max-width: 70rem) 50vw, 33vw"
-                          />
-                        </div>
-                        <div className={styles.cardContent}>
-                          <h3>{farm.name}</h3>
-                          <p>{farm.location || "Location not provided"}</p>
-                          <p>{farm.province || "Province not provided"}</p>
-                          <p>{farm.season || "Season not specified"}</p>
-                        </div>
-                      </Link>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
-          ))
+          <>
+            <NearbyFarmsSection farms={visibleFarms} radiusKm={100} />
+            {sections.map((section) => (
+              <section className={styles.section} key={section.title}>
+                <h2 className={styles.sectionTitle}>{section.title}</h2>
+                {section.farms.length === 0 ? (
+                  <p className={pageStyles.notice}>
+                    No farms are currently listed in this category.
+                  </p>
+                ) : (
+                  <div className={styles.grid}>
+                    {section.farms.map((farm) => (
+                      <article className={styles.card} key={farm.id}>
+                        <Link
+                          className={styles.cardLink}
+                          href={`/farms/${encodeURIComponent(String(farm.id))}`}
+                        >
+                          <div className={styles.thumbnail}>
+                            <FarmThumbnail
+                              className={styles.image}
+                              farm={farm}
+                              sizes="(max-width: 40rem) 100vw, (max-width: 70rem) 50vw, 33vw"
+                            />
+                          </div>
+                          <div className={styles.cardContent}>
+                            <h3>{farm.name}</h3>
+                            <p>{farm.location || "Location not provided"}</p>
+                            <p>{farm.province || "Province not provided"}</p>
+                            <p>{farm.season || "Season not specified"}</p>
+                          </div>
+                        </Link>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+          </>
         )}
       </main>
     </div>

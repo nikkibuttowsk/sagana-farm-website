@@ -197,11 +197,10 @@ export async function getApprovedTicket(ticketToken, client) {
   const { data, error } = await client
     .from("reservations")
     .select(
-      "farm:farms!reservations_farm_id_fkey(name),time_slot:farm_time_slots!reservations_farm_slot_fkey(label),guest_count,visit_date,status",
+      "farm_id,time_slot_id,guest_count,visit_date,status,ticket_expires_at",
     )
     .eq("ticket_token_hash", hashToken(ticketToken))
     .eq("status", "approved")
-    .gt("ticket_expires_at", new Date().toISOString())
     .maybeSingle();
 
   throwOnError(error);
@@ -210,9 +209,25 @@ export async function getApprovedTicket(ticketToken, client) {
     return null;
   }
 
+  if (
+    data.ticket_expires_at &&
+    new Date(data.ticket_expires_at).getTime() <= Date.now()
+  ) {
+    return null;
+  }
+
+  const [{ data: farm }, { data: slot }] = await Promise.all([
+    client.from("farms").select("name").eq("id", data.farm_id).maybeSingle(),
+    client
+      .from("farm_time_slots")
+      .select("label")
+      .eq("id", data.time_slot_id)
+      .maybeSingle(),
+  ]);
+
   return {
-    farmName: data.farm?.name,
-    timeSlotLabel: data.time_slot?.label,
+    farmName: farm?.name ?? "Sagana Farm",
+    timeSlotLabel: slot?.label ?? "Scheduled Visit",
     guestCount: data.guest_count,
     visitDate: data.visit_date,
     status: data.status,
