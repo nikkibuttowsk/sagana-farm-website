@@ -41,9 +41,7 @@ export async function POST(request) {
     errors.admin_email = "Please enter a valid administrator email.";
   }
   if (!crops) errors.crops = "Please enter at least one crop.";
-  if (!videoUrl) {
-    errors.video_url = "A farm video link is required.";
-  } else if (!URL_PATTERN.test(videoUrl)) {
+  if (videoUrl && !URL_PATTERN.test(videoUrl)) {
     errors.video_url = "The video link must start with https://";
   }
   if (imageUrl && !URL_PATTERN.test(imageUrl)) {
@@ -73,12 +71,7 @@ export async function POST(request) {
     const imagesArray = imageUrl ? [imageUrl] : [];
 
     const normalizedSeason = season.toLowerCase();
-    const defaultCategory =
-      normalizedSeason === "wet"
-        ? "wet"
-        : normalizedSeason === "dry"
-          ? "dry"
-          : "featured";
+  
 
     const { data, error } = await supabase
       .from("farms")
@@ -87,17 +80,17 @@ export async function POST(request) {
         province,
         location,
         admin_email: adminEmail,
-        entrance_fee: entranceFee || null,
+        entrance_fee: entranceFee ? Number(entranceFee) : null,
         crops: cropsArray,
         season,
-        category: defaultCategory,
+        category: "featured",
         bearing_season: bearingSeason || null,
         hours: hours || null,
         description: description || null,
         latitude,
         longitude,
         images: imagesArray,
-        video_url: videoUrl,
+        video_url: videoUrl || null,
         status: "pending",
         is_active: false,
         is_trending: false,

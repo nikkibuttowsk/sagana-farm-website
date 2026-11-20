@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import "./site-header.css";
+import NavLinks from "./NavLinks";
 
 export default function SiteHeader() {
   return (
@@ -18,14 +19,7 @@ export default function SiteHeader() {
       </Link>
 
       <nav aria-label="Main navigation">
-        <ul>
-          <li><Link href="/#hero">Home</Link></li>
-          <li><Link href="/#about">About</Link></li>
-          <li><Link href="/farm">Farms</Link></li>
-          <li><Link href="/#map-section">Map</Link></li>
-          <li><Link href="/reservation">Reservation</Link></li>
-          <li><Link href="/#contact">Contact Us</Link></li>
-        </ul>
+        <NavLinks />
       </nav>
 
       <search>
