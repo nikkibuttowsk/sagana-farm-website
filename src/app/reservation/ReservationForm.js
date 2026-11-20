@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import TicketCard from "./TicketCard";
 import styles from "./reservation.module.css";
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -669,80 +670,21 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
             </p>
           </header>
 
-          <section className={styles.ticketCard}>
-            <div className={styles.ticketBanner}>
-              <img
-                src={selectedFarm?.imageUrl || "/farm-placeholder.svg"}
-                alt=""
-                className={styles.ticketThumb}
-                onError={(e) => {
-                  e.currentTarget.src = "/farm-placeholder.svg";
-                }}
-              />
-              <div>
-                <span className={styles.ticketEyebrow}>
-                  FARM VISIT · GUEST TICKET
-                </span>
-                <h2>{selectedFarm?.name}</h2>
-                <p>{selectedFarm?.location}</p>
-              </div>
-            </div>
-
-            <div className={styles.ticketBody}>
-              <div className={styles.ticketLeft}>
-                <div className={styles.ticketLeftHead}>
-                  <h3>Your visit</h3>
-                  <span className={styles.ticketRef}>{notice.reference}</span>
-                </div>
-
-                <div className={styles.infoRow}>
-                  <span className={styles.infoIcon} aria-hidden="true">📅</span>
-                  <div>
-                    <span className={styles.infoLabel}>Visit date</span>
-                    <strong>{formatReadableDate(visitDate)}</strong>
-                  </div>
-                </div>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoIcon} aria-hidden="true">🕒</span>
-                  <div>
-                    <span className={styles.infoLabel}>Time slot</span>
-                    <strong>{selectedSlot?.label}</strong>
-                  </div>
-                </div>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoIcon} aria-hidden="true">👥</span>
-                  <div>
-                    <span className={styles.infoLabel}>Visitors</span>
-                    <strong>
-                      {adults} {adults === 1 ? "adult" : "adults"}
-                      {children > 0
-                        ? ` · ${children} ${children === 1 ? "child" : "children"}`
-                        : ""}
-                    </strong>
-                  </div>
-                </div>
-
-                <div className={styles.bookedFor}>
-                  <span>Booked for</span>
-                  <strong>{visitorName}</strong>
-                </div>
-              </div>
-
-              <div className={styles.ticketRight}>
-                <h3>Your gate check-in ticket</h3>
-                <p>
-                  Show this ticket to the farm team on arrival. They&apos;ll
-                  scan your QR code at the gate.
-                </p>
-                <div className={styles.qrFrame} aria-hidden="true">
-                  <div className={styles.qrGrid} />
-                </div>
-                <span className={styles.qrNote}>
-                  QR ticket is emailed after approval
-                </span>
-              </div>
-            </div>
-          </section>
+          <TicketCard
+            farmName={selectedFarm?.name}
+            location={selectedFarm?.location}
+            imageUrl={selectedFarm?.imageUrl}
+            reference={notice.reference}
+            dateLabel={formatReadableDate(visitDate)}
+            slotLabel={selectedSlot?.label}
+            visitors={`${adults} ${adults === 1 ? "adult" : "adults"}${
+              children > 0
+                ? ` · ${children} ${children === 1 ? "child" : "children"}`
+                : ""
+            }`}
+            bookedFor={visitorName}
+            caption="QR ticket is emailed after approval"
+          />
 
           <div className={styles.confirmFooter}>
             <div className={styles.emailBox}>
