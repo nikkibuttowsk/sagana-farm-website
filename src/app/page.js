@@ -25,7 +25,7 @@ export const instant = false;
 export const metadata = {
   title: "SAGANA: Farm PH",
   description:
-    "Explore fruit farms in the Philippines and plan your next farm visit.",
+    "Explore farms in the Philippines and plan your next farm visit.",
 };
 
 function FarmSearch({ id }) {
@@ -82,7 +82,7 @@ export default async function HomePage() {
             <p className="eyebrow">SAGANA: Fruit Farms PH</p>
             <h1>Discover fresh farms near you</h1>
             <p>
-              Explore top fruit farms in the Philippines and plan your perfect
+              Explore top farms in the Philippines and plan your perfect
               farm getaway.
             </p>
             <a href="#suggested-farms" className="btn btn-secondary">
@@ -101,7 +101,7 @@ export default async function HomePage() {
               <h2>Popular right now</h2>
             </div>
             <Link href="/farm" className="btn btn-outline btn-sm">
-              Browse all farms &rarr;
+              Browse all farms
             </Link>
           </div>
 
@@ -113,7 +113,7 @@ export default async function HomePage() {
 
           <div className="view-all-container">
             <Link href="/farm" className="btn btn-primary btn-lg">
-              Browse all farms in PH &rarr;
+              Browse all farms in PH
             </Link>
           </div>
         </section>
@@ -222,7 +222,7 @@ export default async function HomePage() {
 
             <aside className="owner-cta-card">
               <div className="cta-badge">Farm owners &amp; managers</div>
-              <h2>Own or manage a fruit farm?</h2>
+              <h2>Own or manage a farm?</h2>
               <p>
                 Partner with SAGANA to showcase your farm, feature seasonal
                 harvests, and receive online visit reservations.
@@ -234,7 +234,7 @@ export default async function HomePage() {
               </ul>
               <Link
                 href="/farm/register" className="btn btn-secondary btn-lg full-width">
-                Register your farm now &rarr;
+                Register your farm now
               </Link>
             </aside>
           </div>

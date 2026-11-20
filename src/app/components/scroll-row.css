@@ -1,0 +1,20 @@
+.scroll-wrap { position: relative; }
+
+.scroll-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 2.5rem;
+  height: 2.5rem;
+  transform: translateY(-50%);
+  border: 1px solid var(--border, #dde5d9);
+  border-radius: 50%;
+  background: var(--white, #fff);
+  box-shadow: var(--shadow-md, 0 6px 18px rgba(0,0,0,.1));
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.scroll-arrow.right { right: 0.25rem; }
+.scroll-arrow.left { left: 0.25rem; }
+.scroll-arrow:hover { background: var(--color-tertiary, #dcebd5); }

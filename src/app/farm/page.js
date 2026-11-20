@@ -5,6 +5,7 @@ import SetupNotice from "../components/SetupNotice";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import NearbyFarmsSection from "../components/NearbyFarmsSection";
+import ScrollRow from "../components/ScrollRow";
 import { ServerConfigurationError } from "@/lib/config/env.mjs";
 import {
   filterFarmsByQuery,
@@ -113,9 +114,9 @@ export default async function FarmPage({ searchParams }) {
               {popular.length === 0 ? (
                 <p className="empty-row">No farms found.</p>
               ) : (
-                <div className="farm-grid">
+                <ScrollRow className="farm-row">
                   {popular.map((farm) => <FarmCard key={farm.id} farm={farm} />)}
-                </div>
+                </ScrollRow>
               )}
             </section>
 
@@ -130,9 +131,9 @@ export default async function FarmPage({ searchParams }) {
               {wet.length === 0 ? (
                 <p className="empty-row">No farms found.</p>
               ) : (
-                <div className="season-row">
+                <ScrollRow className="season-row">
                   {wet.map((farm) => <FarmCard key={farm.id} farm={farm} />)}
-                </div>
+                </ScrollRow>
               )}
             </section>
 
@@ -147,9 +148,9 @@ export default async function FarmPage({ searchParams }) {
               {dry.length === 0 ? (
                 <p className="empty-row">No farms found.</p>
               ) : (
-                <div className="season-row">
+                <ScrollRow className="season-row">
                   {dry.map((farm) => <FarmCard key={farm.id} farm={farm} />)}
-                </div>
+                </ScrollRow>
               )}
             </section>
 

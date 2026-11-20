@@ -133,6 +133,7 @@ body:has(.farm-list-container) { background: var(--white); }
   color: var(--muted);
 }
 
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1100px) {
   .farm-list-container .farm-grid { grid-template-columns: repeat(3, 1fr); }
@@ -146,4 +147,33 @@ body:has(.farm-list-container) { background: var(--white); }
   .farm-list-container .farm-group-section { padding: 2.25rem 1rem; }
   .farm-list-container .farm-grid { grid-template-columns: 1fr; }
   .farm-list-container .season-row .farm-card { flex-basis: 78%; }
+}
+
+/* ---------- Scrollable single rows ---------- */
+
+.farm-list-container .farm-row {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 1rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.farm-list-container .farm-row::-webkit-scrollbar { display: none; }
+.farm-list-container .farm-row .farm-card {
+  flex: 0 0 calc((100% - 3.75rem) / 4);
+  min-width: 230px;
+  scroll-snap-align: start;
+}
+.farm-list-container .farm-row .card-media { height: 170px; }
+
+
+@media (max-width: 1100px) {
+  .farm-list-container .farm-row .farm-card { flex-basis: calc((100% - 2.5rem) / 3); }
+}
+@media (max-width: 800px) {
+  .farm-list-container .farm-row .farm-card { flex-basis: 46%; }
+}
+@media (max-width: 520px) {
+  .farm-list-container .farm-row .farm-card { flex-basis: 78%; }
 }
