@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import SetupNotice from "../components/SetupNotice";
 import SiteHeader from "../components/SiteHeader";
+import SiteFooter from "../components/SiteFooter";
 import { ServerConfigurationError } from "@/lib/config/env.mjs";
 import { buildFarmCatalogView } from "@/lib/reservations/views.mjs";
 import {
@@ -120,6 +121,7 @@ export default async function ReservationPage({ searchParams }) {
           minDate={getManilaToday()}
         />
       </main>
+      <SiteFooter />
     </div>
   );
 }
