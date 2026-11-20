@@ -20,7 +20,7 @@ function formatDistance(km) {
   return km < 1 ? `${Math.round(km * 1000)} m away` : `${km.toFixed(1)} km away`;
 }
 
-export default function NearbyFarmsSection({ farms, radiusKm = 100 }) {
+export default function NearbyFarmsSection({ farms, radiusKm = 20 }) {
   const [coords, setCoords] = useState(null);
   const [status, setStatus] = useState("idle"); // idle | locating | ready | denied | unsupported
 
