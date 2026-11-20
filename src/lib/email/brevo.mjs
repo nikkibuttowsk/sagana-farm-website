@@ -13,6 +13,7 @@ export function createBrevoEmailClient(apiKey, fetchImpl = globalThis.fetch) {
           body: JSON.stringify({
             sender: { email: message.from },
             to: [{ email: message.to }],
+            ...(message.replyTo ? { replyTo: { email: message.replyTo } } : {}),
             subject: message.subject,
             textContent: message.text,
             htmlContent: message.html,
