@@ -72,6 +72,14 @@ export async function POST(request) {
       .filter(Boolean);
     const imagesArray = imageUrl ? [imageUrl] : [];
 
+    const normalizedSeason = season.toLowerCase();
+    const defaultCategory =
+      normalizedSeason === "wet"
+        ? "wet"
+        : normalizedSeason === "dry"
+          ? "dry"
+          : "featured";
+
     const { data, error } = await supabase
       .from("farms")
       .insert({
@@ -82,6 +90,7 @@ export async function POST(request) {
         entrance_fee: entranceFee || null,
         crops: cropsArray,
         season,
+        category: defaultCategory,
         bearing_season: bearingSeason || null,
         hours: hours || null,
         description: description || null,

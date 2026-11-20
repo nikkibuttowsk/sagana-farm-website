@@ -152,6 +152,19 @@ export default async function FarmPage({ searchParams }) {
                 </div>
               )}
             </section>
+
+            {/* ALL FARMS (CATCH-ALL FOR UNCATEGORIZED & YEAR-ROUND FARMS) */}
+            <section className="farm-group-section band">
+              <div className="section-header">
+                <h2>🌱 Explore All Farms ({visibleFarms.length})</h2>
+                <p className="section-sub">
+                  Browse every active partner farm across the Philippines, including year-round and newly added destinations.
+                </p>
+              </div>
+              <div className="farm-grid">
+                {visibleFarms.map((farm) => <FarmCard key={farm.id} farm={farm} />)}
+              </div>
+            </section>
           </>
         )}
       </main>
