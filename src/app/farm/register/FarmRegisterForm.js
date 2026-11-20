@@ -55,9 +55,9 @@ export default function FarmRegisterForm() {
       return;
     }
 
-    if (!/^https?:\/\/.+/i.test(form.video_url.trim())) {
-      setErrors({ video_url: "A video link is required (it must start with https://)." });
-      setFormError("Please add a video walkthrough link of your farm.");
+    if (form.video_url.trim() && !/^https?:\/\/.+/i.test(form.video_url.trim())) {
+      setErrors({ video_url: "The video link must start with https://" });
+      setFormError("Please check the video link.");
       return;
     }
 
@@ -259,9 +259,9 @@ export default function FarmRegisterForm() {
             {fieldError("image_url")}
           </p>
           <p className="form-field">
-            <label htmlFor="reg-video-url">Farm Video Walkthrough (URL) *</label>
-            <input type="url" id="reg-video-url" name="video_url" required
-              placeholder="https://example.com/farm-video.mp4"
+            <label htmlFor="reg-video-url">Farm Video Walkthrough (URL)</label>
+            <input type="url" id="reg-video-url" name="video_url"
+              placeholder="https://example.com/farm-video.mp4 (optional)"
               value={form.video_url} onChange={set("video_url")} />
             {fieldError("video_url")}
           </p>

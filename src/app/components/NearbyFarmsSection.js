@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import FarmThumbnail from "./FarmThumbnail";
 import "./nearby-farms.css";
+import ScrollRow from "./ScrollRow";
 
 function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const toRad = (deg) => (deg * Math.PI) / 180;
@@ -74,9 +75,8 @@ export default function NearbyFarmsSection({ farms, radiusKm = 20 }) {
   return (
     <section className="nearby-section" aria-labelledby="nearby-farms-heading">
       <div className="nearby-header">
-        <h2 id="nearby-farms-heading">📍 Nearby Farms</h2>
+        <h2 id="nearby-farms-heading">Nearby Farms</h2>
 
-        {status !== "ready" && (
           <button
             type="button"
             className="nearby-btn"
@@ -85,7 +85,6 @@ export default function NearbyFarmsSection({ farms, radiusKm = 20 }) {
           >
             {status === "locating" ? "Finding nearby farms..." : "Use my location"}
           </button>
-        )}
       </div>
 
       {status === "idle" && (
@@ -112,7 +111,7 @@ export default function NearbyFarmsSection({ farms, radiusKm = 20 }) {
       )}
 
       {status === "ready" && nearbyFarms.length > 0 && (
-        <div className="nearby-grid">
+        <ScrollRow className="nearby-row">
           {nearbyFarms.map((farm) => (
             <article className="nearby-card" key={farm.id}>
               <Link href={`/farms/${encodeURIComponent(String(farm.id))}`}>
@@ -131,7 +130,7 @@ export default function NearbyFarmsSection({ farms, radiusKm = 20 }) {
               </Link>
             </article>
           ))}
-        </div>
+        </ScrollRow>
       )}
     </section>
   );

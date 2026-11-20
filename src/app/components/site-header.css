@@ -56,7 +56,11 @@
   color: var(--color-secondary, #2e6b3d);
   border-color: var(--color-secondary, #2e6b3d);
 }
-
+#site-header nav a.active {
+  color: var(--color-secondary, #2e6b3d);
+  border-color: var(--color-secondary, #2e6b3d);
+  font-weight: 700;
+}
 #site-header search { width: 220px; }
 
 @media (max-width: 900px) {

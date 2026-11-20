@@ -30,11 +30,31 @@
 .nearby-note { color: var(--muted, #5f6f64); font-size: 0.95rem; }
 .nearby-note.error { color: #8a2c2c; }
 
-/* fixed-size cards: 4 across, they never stretch */
-.nearby-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+
+/* single scrollable row */
+.nearby-row {
+  display: flex;
   gap: 1.25rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 1rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.nearby-row::-webkit-scrollbar { display: none; }
+.nearby-row .nearby-card {
+  flex: 0 0 calc((100% - 3.75rem) / 4);
+  min-width: 230px;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 1100px) {
+  .nearby-row .nearby-card { flex-basis: calc((100% - 2.5rem) / 3); }
+}
+@media (max-width: 800px) {
+  .nearby-row .nearby-card { flex-basis: 46%; }
+}
+@media (max-width: 520px) {
+  .nearby-row .nearby-card { flex-basis: 78%; }
 }
 .nearby-card {
   overflow: hidden;

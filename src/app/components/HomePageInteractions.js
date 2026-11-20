@@ -1,5 +1,6 @@
 "use client";
 
+import ScrollRow from "./ScrollRow";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -158,7 +159,7 @@ export function PopularFarmGrid({ farms }) {
   }
 
   return (
-    <div className="farm-grid">
+    <ScrollRow className="farm-row">
       {farms.map((farm) => (
         <article className="farm-card" key={farm.id}>
           <Link href={`/farms/${encodeURIComponent(String(farm.id))}`}>
@@ -175,7 +176,7 @@ export function PopularFarmGrid({ farms }) {
           </Link>
         </article>
       ))}
-    </div>
+    </ScrollRow>
   );
 }
 
