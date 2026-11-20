@@ -35,6 +35,8 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
   const [draft, setDraft] = useState("");
   const [sent, setSent] = useState(false);       // Send button bounce
   const [closing, setClosing] = useState(false); // pop-up closing animation
+  const [thinking, setThinking] = useState(false);        // waiting for the AI
+  const [pendingQuestion, setPendingQuestion] = useState(null); // set when we need the visitor's email
   const wrapperRef = useRef(null);
   const chatLogRef = useRef(null);
 
@@ -43,18 +45,18 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
     ...imageUrls.map((src) => ({ type: "photo", src })),
   ];
 
+  // play the closing animation, then leave the page
+  const closePopup = () => {
+    if (closing) return;
+    setClosing(true);
+    setTimeout(() => router.push("/farm"), 250);
+  };
+
   // open the pop-up (CSS needs "farm-open" on <html>)
   useEffect(() => {
     document.documentElement.classList.add("farm-open");
     return () => document.documentElement.classList.remove("farm-open");
   }, []);
-
-  // new farm -> first slide, empty chat
-  useEffect(() => {
-    setCurrent(0);
-    setMessages([]);
-    setClosing(false);
-  }, [farm.id]);
 
   // pause the video when it is not the visible slide
   useEffect(() => {
@@ -78,31 +80,60 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
   // keep the chat scrolled to the newest message
   useEffect(() => {
     if (chatLogRef.current) chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
-  }, [messages]);
+  }, [messages, thinking]);
 
   const go = (step) => setCurrent((i) => (i + step + slides.length) % slides.length);
 
-  // play the closing animation, then leave the page
-  const closePopup = () => {
-    if (closing) return;
-    setClosing(true);
-    setTimeout(() => router.push("/farm"), 250);
-  };
-
-  const sendChat = (e) => {
+  // Sends the visitor's question to the AI route. If the AI can't answer, the next
+  // message the visitor types is treated as their email so the farm can reply.
+  const sendChat = async (e) => {
     e.preventDefault();
     const text = draft.trim();
-    if (!text) return;
+    if (!text || thinking) return;
+
+    const givingEmail = pendingQuestion !== null;
+    const question = givingEmail ? pendingQuestion : text;
+    const email = givingEmail ? text : "";
+    const reply = (botText) => setMessages((m) => [...m, { from: "bot", text: botText }]);
+
     setMessages((m) => [...m, { from: "user", text }]);
     setDraft("");
     setSent(true);
     setTimeout(() => setSent(false), 400);
-    setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        { from: "bot", text: "Thanks for reaching out! Our team has logged your question and will reply shortly." },
-      ]);
-    }, 600);
+    setThinking(true);
+
+    try {
+      const res = await fetch(`/api/farms/${encodeURIComponent(farm.id)}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, email }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        // keep pendingQuestion so a mistyped email can be corrected
+        reply(data.error || "Sorry, something went wrong. Please try again.");
+      } else if (data.status === "answered") {
+        setPendingQuestion(null);
+        reply(data.answer);
+      } else if (data.status === "needs_email") {
+        setPendingQuestion(question);
+        reply(
+          "I can't answer that from this farm's listing. Type your email below and I'll send your question to the farm so they can reply.",
+        );
+      } else if (data.status === "escalated") {
+        setPendingQuestion(null);
+        reply(
+          data.emailSent === false
+            ? "Thanks! We saved your question and will pass it to the farm."
+            : `Thanks! Your question was sent to the farm. They'll reply to ${email}.`,
+        );
+      }
+    } catch {
+      reply("Network error. Please check your connection and try again.");
+    } finally {
+      setThinking(false);
+    }
   };
 
   // header info
@@ -250,23 +281,40 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
 
           <section className="farm-section">
             <h2>Ask about this farm</h2>
-            <div className="chat-log" ref={chatLogRef}>
-              <div className="msg bot-msg">Hi! Ask me anything about {farm.name}.</div>
+            <div className="chat-log" ref={chatLogRef} aria-live="polite">
+              <div className="msg bot-msg">
+                Hi! Ask me anything about {farm.name}. I&apos;m an AI assistant and answer from this farm&apos;s listing.
+              </div>
               {messages.map((m, i) => (
                 <div key={i} className={`msg ${m.from === "user" ? "user-msg" : "bot-msg"}`}>{m.text}</div>
               ))}
+              {thinking && <div className="msg bot-msg">Thinking...</div>}
             </div>
             <form className="chat-input-form" onSubmit={sendChat}>
               <input
+                type={pendingQuestion !== null ? "email" : "text"}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Type your question..."
-                aria-label="Your question"
+                placeholder={pendingQuestion !== null ? "Your email address..." : "Type your question..."}
+                aria-label={pendingQuestion !== null ? "Your email address" : "Your question"}
+                maxLength={pendingQuestion !== null ? 254 : 300}
+                disabled={thinking}
               />
-              <button type="submit" className={`btn btn-primary${sent ? " pop" : ""}`}>
+              <button type="submit" className={`btn btn-primary${sent ? " pop" : ""}`} disabled={thinking}>
                 Send
               </button>
             </form>
+            {pendingQuestion !== null && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingQuestion(null);
+                  setDraft("");
+                }}
+              >
+                Ask something else
+              </button>
+            )}
           </section>
         </div>
 

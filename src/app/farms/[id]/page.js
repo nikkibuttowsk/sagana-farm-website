@@ -85,6 +85,7 @@ export default async function FarmDetailsPage({ params }) {
     <>
       <SiteHeader />
       <FarmPopup
+        key={farmData.id}
         farm={farmData}
         videoUrl={getFarmVideoUrl(farm.video_url) || null}
         imageUrls={getFarmImageUrls(farm)}
