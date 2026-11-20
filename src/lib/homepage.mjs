@@ -88,6 +88,13 @@ export function getFeaturedFarms(farms) {
   return featured.length > 0 ? featured : list.slice(0, MAX_FEATURED_FALLBACKS);
 }
 
+export function getUncategorizedFarms(farms) {
+  return asFarmList(farms).filter(
+    (farm) =>
+      typeof farm?.category !== "string" || farm.category.trim().length === 0,
+  );
+}
+
 export function getLocatedFarms(farms) {
   return asFarmList(farms).filter((farm) => {
     const latitude = numericCoordinate(farm?.latitude);
