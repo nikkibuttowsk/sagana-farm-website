@@ -5,6 +5,7 @@ import Link from "next/link";
 import styles from "./reservation.module.css";
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const STEP_LABELS = ["Visit details", "Guest & waiver", "Digital ticket"];
 
 function parseIsoDate(iso) {
   if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
@@ -225,41 +226,63 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
 
   return (
     <div className={styles.wrapper}>
-      {/* Top Stepper */}
-      <nav className={styles.stepper} aria-label="Reservation progress">
-        <div
-          className={`${styles.stepItem} ${step >= 1 ? styles.stepActive : ""}`}
-        >
-          <span className={styles.stepDot}>{step > 1 ? "✓" : "1"}</span>
-          <span className={styles.stepLabel}>Plan Visit</span>
+      {/* Progress card */}
+      <section className={styles.progressCard} aria-label="Reservation progress">
+        <div className={styles.progressTop}>
+          {step === 2 ? (
+            <button
+              type="button"
+              className={styles.progressBack}
+              onClick={() => setStep(1)}
+              aria-label="Back to date and time"
+            >
+              &larr;
+            </button>
+          ) : (
+            <Link
+              href="/farm"
+              className={styles.progressBack}
+              aria-label="Back to farms"
+            >
+              &larr;
+            </Link>
+          )}
+          <span className={styles.progressTitle}>Reservation</span>
+          <span className={styles.guestBadge}>GUEST</span>
         </div>
-        <div
-          className={`${styles.stepLine} ${step >= 2 ? styles.stepLineActive : ""}`}
-        />
-        <div
-          className={`${styles.stepItem} ${step >= 2 ? styles.stepActive : ""}`}
-        >
-          <span className={styles.stepDot}>{step > 2 ? "✓" : "2"}</span>
-          <span className={styles.stepLabel}>Your Details</span>
-        </div>
-        <div
-          className={`${styles.stepLine} ${step >= 3 ? styles.stepLineActive : ""}`}
-        />
-        <div
-          className={`${styles.stepItem} ${step >= 3 ? styles.stepActive : ""}`}
-        >
-          <span className={styles.stepDot}>3</span>
-          <span className={styles.stepLabel}>Confirmation</span>
-        </div>
-      </nav>
+
+        <ol className={styles.progressBars}>
+          {STEP_LABELS.map((label, i) => {
+            const n = i + 1;
+            const done = step > n;
+            return (
+              <li
+                key={label}
+                className={`${styles.progressItem} ${
+                  step >= n ? styles.progressActive : ""
+                }`}
+                aria-current={step === n ? "step" : undefined}
+              >
+                <span className={styles.progressBar} />
+                <span className={styles.progressLabel}>
+                  {done ? "✓ " : `${n}. `}
+                  {label}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
 
       {/* STEP 1: PLAN YOUR FARM DAY */}
       {step === 1 && (
         <div className={styles.stepContainer}>
           <header className={styles.stepHeader}>
+            <span className={styles.stepEyebrow}>Step 1 of 3</span>
             <h1>Plan your farm day</h1>
             <p>
-              Pick the farm, date, time slot, and group size for your visit.
+              A little fresh air, a day to look forward to. Start with your
+              visit details.
             </p>
           </header>
 
@@ -473,7 +496,7 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
             onClick={handleContinueStep1}
             disabled={timeSlots.length === 0}
           >
-            Continue &rarr;
+            Continue
           </button>
         </div>
       )}
@@ -482,13 +505,7 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
       {step === 2 && (
         <div className={styles.stepContainer}>
           <header className={styles.stepHeader}>
-            <button
-              type="button"
-              className={styles.backLink}
-              onClick={() => setStep(1)}
-            >
-              &larr; Back to date &amp; time
-            </button>
+            <span className={styles.stepEyebrow}>Step 2 of 3</span>
             <h1>Your details, then you&apos;re set</h1>
             <p>
               We&apos;ll send your visit confirmation and QR pass to this email
@@ -625,106 +642,128 @@ export default function ReservationForm({ farms, initialFarmId, minDate }) {
               className={styles.primaryCta}
               disabled={submitting}
             >
-              {submitting ? "Submitting request…" : "Request reservation →"}
+              {submitting ? "Submitting request…" : "Request reservation"}
             </button>
           </form>
         </div>
       )}
 
-      {/* STEP 3: CONFIRMATION / PENDING PASS */}
+      {/* STEP 3: CONFIRMATION */}
       {step === 3 && notice && (
-        <div className={styles.stepContainer}>
-          <header className={`${styles.stepHeader} ${styles.centerHeader}`}>
-            <span className={styles.statusPill}>
+        <div className={styles.confirmWrap}>
+          <header className={styles.confirmHeader}>
+            <span className={styles.confirmPill}>
+              ✓{" "}
               {notice.kind === "submitted"
                 ? "Request Submitted"
                 : "Saved • Email Pending"}
             </span>
             <h1>See you at the farm!</h1>
             <p>
+              Your farm day is almost set,{" "}
+              {visitorName.split(" ")[0] || "friend"}.
+              <br />
               {notice.kind === "submitted"
-                ? "Your visit request is with the farm administrator. Watch your inbox for your official QR ticket."
-                : "Your request was saved, though the notification email could not be sent automatically. Keep your reference below."}
+                ? "Watch your inbox. Your QR ticket arrives once the farm approves."
+                : "Your request was saved. Keep your reference below."}
             </p>
           </header>
 
           <section className={styles.ticketCard}>
             <div className={styles.ticketBanner}>
+              <img
+                src={selectedFarm?.imageUrl || "/farm-placeholder.svg"}
+                alt=""
+                className={styles.ticketThumb}
+                onError={(e) => {
+                  e.currentTarget.src = "/farm-placeholder.svg";
+                }}
+              />
               <div>
-                <span className={styles.ticketEyebrow}>SAGANA VISIT PASS</span>
+                <span className={styles.ticketEyebrow}>
+                  FARM VISIT · GUEST TICKET
+                </span>
                 <h2>{selectedFarm?.name}</h2>
                 <p>{selectedFarm?.location}</p>
               </div>
-              <span className={styles.ticketBadge}>PENDING APPROVAL</span>
             </div>
 
             <div className={styles.ticketBody}>
-              <div className={styles.ticketDetails}>
-                <div className={styles.ticketRow}>
-                  <span>Reference ID</span>
-                  <strong>{notice.reference}</strong>
+              <div className={styles.ticketLeft}>
+                <div className={styles.ticketLeftHead}>
+                  <h3>Your visit</h3>
+                  <span className={styles.ticketRef}>{notice.reference}</span>
                 </div>
-                <div className={styles.ticketRow}>
-                  <span>Visitor</span>
+
+                <div className={styles.infoRow}>
+                  <span className={styles.infoIcon} aria-hidden="true">📅</span>
+                  <div>
+                    <span className={styles.infoLabel}>Visit date</span>
+                    <strong>{formatReadableDate(visitDate)}</strong>
+                  </div>
+                </div>
+                <div className={styles.infoRow}>
+                  <span className={styles.infoIcon} aria-hidden="true">🕒</span>
+                  <div>
+                    <span className={styles.infoLabel}>Time slot</span>
+                    <strong>{selectedSlot?.label}</strong>
+                  </div>
+                </div>
+                <div className={styles.infoRow}>
+                  <span className={styles.infoIcon} aria-hidden="true">👥</span>
+                  <div>
+                    <span className={styles.infoLabel}>Visitors</span>
+                    <strong>
+                      {adults} {adults === 1 ? "adult" : "adults"}
+                      {children > 0
+                        ? ` · ${children} ${children === 1 ? "child" : "children"}`
+                        : ""}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className={styles.bookedFor}>
+                  <span>Booked for</span>
                   <strong>{visitorName}</strong>
-                </div>
-                <div className={styles.ticketRow}>
-                  <span>Visit Date</span>
-                  <strong>{formatReadableDate(visitDate)}</strong>
-                </div>
-                <div className={styles.ticketRow}>
-                  <span>Time Slot</span>
-                  <strong>{selectedSlot?.label}</strong>
-                </div>
-                <div className={styles.ticketRow}>
-                  <span>Guests</span>
-                  <strong>
-                    {totalGuests} ({adults} {adults === 1 ? "Adult" : "Adults"}
-                    {children > 0
-                      ? `, ${children} ${children === 1 ? "Child" : "Children"}`
-                      : ""}
-                    )
-                  </strong>
                 </div>
               </div>
 
-              <div className={styles.ticketQrBox}>
-                <div className={styles.qrPlaceholder} aria-hidden="true">
-                  <span>QR</span>
-                </div>
+              <div className={styles.ticketRight}>
+                <h3>Your gate check-in ticket</h3>
                 <p>
-                  Your unique check-in QR code will be sent to{" "}
-                  <strong>{visitorEmail}</strong> once approved.
+                  Show this ticket to the farm team on arrival. They&apos;ll
+                  scan your QR code at the gate.
                 </p>
+                <div className={styles.qrFrame} aria-hidden="true">
+                  <div className={styles.qrGrid} />
+                </div>
+                <span className={styles.qrNote}>
+                  QR ticket is emailed after approval
+                </span>
               </div>
             </div>
           </section>
 
-          <div
-            className={styles.confirmationActions}
-            style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
-          >
-            <button
-              type="button"
-              className={styles.primaryCta}
-              onClick={resetForm}
-            >
-              Book another reservation
-            </button>
-            <Link
-              href="/"
-              className={styles.secondaryButton}
-              style={{
-                display: "block",
-                textAlign: "center",
-                padding: "0.9rem 1.25rem",
-                borderRadius: "0.75rem",
-                textDecoration: "none",
-                fontWeight: 600,
-              }}
-            >
-              Back to home
-            </Link>
+          <div className={styles.confirmFooter}>
+            <div className={styles.emailBox}>
+              <span aria-hidden="true">✉️</span>
+              <div>
+                <strong>Ticket emailed to you</strong>
+                <span>{visitorEmail}</span>
+              </div>
+            </div>
+            <div className={styles.confirmActions}>
+              <Link href="/farm" className={styles.backFarmBtn}>
+                Back to Farm &larr;
+              </Link>
+              <button
+                type="button"
+                className={styles.linkBtn}
+                onClick={resetForm}
+              >
+                Book another reservation
+              </button>
+            </div>
           </div>
         </div>
       )}
