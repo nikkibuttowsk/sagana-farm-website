@@ -1,3 +1,5 @@
+import SiteHeader from "./components/SiteHeader";
+import SiteFooter from "./components/SiteFooter";
 import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -72,44 +74,7 @@ export default async function HomePage() {
         Skip to main content
       </a>
 
-      <header id="site-header">
-        <Link href="/" aria-label="SAGANA: Farm PH Home">
-          <Image
-            id="logo"
-            src="/farm-placeholder.svg"
-            alt=""
-            width={40}
-            height={40}
-            priority
-          />
-          <span>Fruit Farms PH</span>
-        </Link>
-
-        <nav aria-label="Main navigation">
-          <ul>
-            <li>
-              <a href="#hero">Home</a>
-            </li>
-            <li>
-              <a href="#about">About</a>
-            </li>
-            <li>
-              <Link href="/farm">Farms</Link>
-            </li>
-            <li>
-              <a href="#map-section">Map</a>
-            </li>
-            <li>
-              <Link href="/reservation">Reservation</Link>
-            </li>
-            <li>
-              <a href="#contact">Contact</a>
-            </li>
-          </ul>
-        </nav>
-
-        <FarmSearch id="site-search" />
-      </header>
+      <SiteHeader />
 
       <main id="main-content">
         <section id="hero">
@@ -193,23 +158,32 @@ export default async function HomePage() {
           </div>
           <div className="team-grid">
             <article className="team-card">
-              <div className="team-avatar" aria-hidden="true">
-                NL
-              </div>
+              <Image
+                src="/images/team1.jpg"
+                alt="Nikki Limboc"
+                width={96}
+                height={96}
+              />
               <h3>Nikki Limboc</h3>
               <p>Lead Developer</p>
             </article>
             <article className="team-card">
-              <div className="team-avatar" aria-hidden="true">
-                JM
-              </div>
-              <h3>Julian Carlo Magbuhat</h3>
-              <p>UI/UX Designer</p>
+              <Image
+                src="/images/team2.jpg"
+                alt="Julian Carlo Magbuhat"
+                width={96}
+                height={96}
+              />
+             <h3>Julian Carlo Magbuhat</h3>
+             <p>UI/UX Designer</p>
             </article>
             <article className="team-card">
-              <div className="team-avatar" aria-hidden="true">
-                CM
-              </div>
+              <Image
+                src="/images/team3.jpg"
+                alt="Christine Nicole Miranda"
+                width={96}
+                height={96}
+              />
               <h3>Christine Nicole Miranda</h3>
               <p>Project Lead</p>
             </article>
@@ -267,30 +241,7 @@ export default async function HomePage() {
         </section>
       </main>
 
-      <footer id="site-footer">
-        <nav aria-label="Footer navigation">
-          <ul>
-            <li>
-              <a href="#about">About</a>
-            </li>
-            <li>
-              <a href="#suggested-farms">Farms</a>
-            </li>
-            <li>
-              <span>Privacy policy</span>
-            </li>
-            <li>
-              <span>Terms of use</span>
-            </li>
-          </ul>
-        </nav>
-        <address>
-          Contact us: <a href="mailto:sagana077@gmail.com">sagana077@gmail.com</a>
-        </address>
-        <p>
-          <small>&copy; 2026 SAGANA: Fruit Farms PH. All rights reserved.</small>
-        </p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

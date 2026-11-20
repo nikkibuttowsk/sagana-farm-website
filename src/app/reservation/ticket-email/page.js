@@ -1,3 +1,4 @@
+```javascript
 import SiteHeader from "../../components/SiteHeader";
 import { buildTicketEmailRetryMessage } from "@/lib/reservations/views.mjs";
 import styles from "../reservation.module.css";
