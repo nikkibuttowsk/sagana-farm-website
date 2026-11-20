@@ -278,3 +278,36 @@ export function createVisitorStatusMessage(
     }),
   };
 }
+
+export function createFarmQuestionMessage({ farmName, question, visitorEmail }, { from, to }) {
+  const bodyHtml = `
+    <p style="margin:0 0 4px;font-size:15px;line-height:1.5;color:#1f2e23;">
+      A visitor asked a question about <strong>${escapeHtml(farmName)}</strong> that the assistant could not answer from the farm listing.
+    </p>
+    ${renderDetailsTable([
+      ["Farm", farmName],
+      ["Visitor email", visitorEmail],
+    ])}
+    <div style="padding:14px 16px;background-color:#e8f2e4;border-radius:10px;font-size:14px;line-height:1.5;color:#173d2b;">
+      ${escapeHtml(question)}
+    </div>
+    <p style="margin:16px 0 0;font-size:12px;line-height:1.5;color:#6b7a6e;">
+      Reply to this email to answer the visitor directly.
+    </p>
+  `;
+
+  return {
+    from,
+    to,
+    replyTo: visitorEmail,
+    subject: `Visitor question about ${farmName}`,
+    text: `Farm: ${farmName}\nVisitor email: ${visitorEmail}\n\nQuestion: ${question}\n\nReply to this email to answer the visitor.`,
+    html: wrapEmailLayout({
+      eyebrow: "SAGANA ADMIN • VISITOR QUESTION",
+      title: "A visitor has a question",
+      subtitle: farmName,
+      bodyHtml,
+      footerNote: "Replying to this email sends your answer straight to the visitor.",
+    }),
+  };
+}
