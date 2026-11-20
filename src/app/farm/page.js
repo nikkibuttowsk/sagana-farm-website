@@ -102,7 +102,7 @@ export default async function FarmPage({ searchParams }) {
           <>
             {/* NEARBY */}
             <section className="farm-group-section">
-              <NearbyFarmsSection farms={visibleFarms} radiusKm={100} />
+              <NearbyFarmsSection farms={visibleFarms} radiusKm={20} />
             </section>
 
             {/* POPULAR */}
