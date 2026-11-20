@@ -79,7 +79,7 @@ export default async function FarmPage({ searchParams }) {
       <SiteHeader />
       <main id="main-content" className="farm-list-container">
         <header className="page-title-banner">
-          <h1>Explore Fruit Farms</h1>
+          <h1>Explore Farms</h1>
           <p>
             Find harvest locations across the Philippines best suited for your
             schedule and season.
@@ -108,7 +108,7 @@ export default async function FarmPage({ searchParams }) {
             {/* POPULAR */}
             <section className="farm-group-section band">
               <div className="section-header">
-                <h2>🔥 Popular Right Now</h2>
+                <h2>Popular Right Now</h2>
               </div>
               {popular.length === 0 ? (
                 <p className="empty-row">No farms found.</p>
@@ -122,7 +122,7 @@ export default async function FarmPage({ searchParams }) {
             {/* WET SEASON */}
             <section className="farm-group-section">
               <div className="section-header">
-                <h2>🌧️ Best for Wet Season (June – November)</h2>
+                <h2>Best for Wet Season (June – November)</h2>
                 <p className="section-sub">
                   Farms featuring rain-resilient fruits like Durian, Rambutan, and Lanzones.
                 </p>
@@ -139,7 +139,7 @@ export default async function FarmPage({ searchParams }) {
             {/* DRY SEASON */}
             <section className="farm-group-section">
               <div className="section-header">
-                <h2>☀️ Best for Dry Season (December – May)</h2>
+                <h2>Best for Dry Season (December – May)</h2>
                 <p className="section-sub">
                   Peak harvest season for Mangoes, Strawberries, Watermelons, and Pineapples.
                 </p>
