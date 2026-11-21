@@ -7,6 +7,18 @@ import {
 const TOKEN_HASH_PATTERN = /^[0-9a-f]{64}$/;
 const APPROVAL_LIFETIME_MS = 72 * 60 * 60 * 1000;
 const RETRY_LIFETIME_MS = 7 * 24 * 60 * 60 * 1000;
+const IDEMPOTENCY_COLUMNS =
+  "id,farm_id,time_slot_id,visit_date,visitor_email,status,admin_email_sent_at,created_at";
+
+// Thrown when the same submit arrives again (double click, retry, race).
+// The workflow turns it into the original result instead of creating a second row.
+export class DuplicateReservationError extends Error {
+  constructor(reservation) {
+    super("Duplicate reservation request.");
+    this.name = "DuplicateReservationError";
+    this.reservation = reservation;
+  }
+}
 
 function assertTokenHash(value, name) {
   if (typeof value !== "string" || !TOKEN_HASH_PATTERN.test(value)) {
@@ -18,6 +30,65 @@ function throwOnError(error) {
   if (error) {
     throw error;
   }
+}
+
+async function findReservationByIdempotencyKey(client, key) {
+  const { data, error } = await client
+    .from("reservations")
+    .select(IDEMPOTENCY_COLUMNS)
+    .eq("idempotency_key", key)
+    .maybeSingle();
+
+  throwOnError(error);
+
+  return data;
+}
+
+// A reused key must belong to the same reservation, never a different one.
+function assertSameReservation(existing, value) {
+  const same =
+    existing.farm_id === value.farmId &&
+    existing.time_slot_id === value.timeSlotId &&
+    existing.visit_date === value.visitDate &&
+    String(existing.visitor_email).toLowerCase() === value.visitorEmail;
+
+  if (!same) {
+    throw new ReservationValidationError({
+      idempotencyKey: "This request key was already used for a different reservation.",
+    });
+  }
+}
+
+// Used by the API route BEFORE rate limiting: if this exact submit already exists,
+// return it so the repeat neither burns rate-limit allowance nor creates anything.
+// Throws ReservationValidationError if the key belongs to a different reservation.
+export async function findReplayedReservation(value, client) {
+  if (!value?.idempotencyKey) {
+    return null;
+  }
+
+  const existing = await findReservationByIdempotencyKey(
+    client,
+    value.idempotencyKey,
+  );
+
+  if (!existing) {
+    return null;
+  }
+
+  assertSameReservation(existing, value);
+
+  return existing;
+}
+
+// Records that the admin notification really went out, so a later replay can say so.
+export async function markAdminEmailSent(reservationId, client) {
+  const { error } = await client
+    .from("reservations")
+    .update({ admin_email_sent_at: new Date().toISOString() })
+    .eq("id", reservationId);
+
+  throwOnError(error);
 }
 
 export async function getActiveFarms(client) {
@@ -36,6 +107,19 @@ export async function getActiveFarms(client) {
   }
 
   return data;
+}
+
+// Lightweight list used for the previous/next farm buttons.
+export async function getActiveFarmIds(client) {
+  const { data, error } = await client
+    .from("farms")
+    .select("id")
+    .eq("is_active", true)
+    .order("name", { ascending: true });
+
+  throwOnError(error);
+
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getActiveFarmById(client, farmId) {
@@ -118,6 +202,20 @@ export async function createPendingReservation(
 
   const now = new Date();
   const { value } = validation;
+
+  // Same submit again? Return the original reservation instead of creating another.
+  if (value.idempotencyKey) {
+    const existing = await findReservationByIdempotencyKey(
+      client,
+      value.idempotencyKey,
+    );
+
+    if (existing) {
+      assertSameReservation(existing, value);
+      throw new DuplicateReservationError(existing);
+    }
+  }
+
   const reservation = {
     farm_id: farm.id,
     time_slot_id: slot.id,
@@ -127,6 +225,7 @@ export async function createPendingReservation(
     guest_count: value.guestCount,
     visit_date: value.visitDate,
     status: "pending",
+    idempotency_key: value.idempotencyKey ?? null,
     admin_action_token_hash: actionTokenHash,
     admin_action_expires_at: new Date(
       now.getTime() + APPROVAL_LIFETIME_MS,
@@ -144,7 +243,31 @@ export async function createPendingReservation(
     )
     .single();
 
-  throwOnError(error);
+  if (error) {
+    if (error.code === "23505") {
+      // Two identical requests raced each other and the other one won.
+      if (value.idempotencyKey) {
+        const existing = await findReservationByIdempotencyKey(
+          client,
+          value.idempotencyKey,
+        );
+
+        if (existing) {
+          assertSameReservation(existing, value);
+          throw new DuplicateReservationError(existing);
+        }
+      }
+
+      // Same visitor already has a pending/approved request for this slot.
+      if (String(error.message).includes("one_active_per_visitor_slot")) {
+        throw new ReservationValidationError({
+          timeSlotId: "You already have a request for this time slot.",
+        });
+      }
+    }
+
+    throw error;
+  }
 
   if (!data) {
     throw new Error("Supabase did not return the saved reservation.");
@@ -298,16 +421,4 @@ export async function claimTicketEmailRetry(
   const { reservation_id: id, ...details } = reservation;
 
   return { id, ...details };
-}
-
-export async function getActiveFarmIds(client) {
-  const { data, error } = await client
-    .from("farms")
-    .select("id")
-    .eq("is_active", true)
-    .order("name", { ascending: true });
-
-  throwOnError(error);
-
-  return Array.isArray(data) ? data : [];
 }

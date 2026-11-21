@@ -13,11 +13,28 @@ function buildUrl(baseUrl, path, values) {
 export async function submitReservation(input, deps) {
   const actionToken = deps.createOpaqueToken();
   const retryToken = deps.createOpaqueToken();
-  const reservation = await deps.repository.createPendingReservation(
-    input,
-    actionToken.hash,
-    retryToken.hash,
-  );
+  let reservation;
+
+  try {
+    reservation = await deps.repository.createPendingReservation(
+      input,
+      actionToken.hash,
+      retryToken.hash,
+    );
+  } catch (error) {
+    // Same submit arrived again (double click, retry): return the original
+    // reservation and do NOT send the emails a second time.
+    if (error?.name === "DuplicateReservationError") {
+      return {
+        reference: error.reservation.id,
+        notificationSent: true,
+        replayed: true,
+      };
+    }
+
+    throw error;
+  }
+
   const actionUrl = buildUrl(
     deps.appBaseUrl,
     "/reservation/action",
@@ -39,6 +56,14 @@ export async function submitReservation(input, deps) {
     notificationSent = true;
   } catch (error) {
     reportError(deps, error, "Could not send admin reservation email.");
+  }
+
+  if (notificationSent && typeof deps.repository.markAdminEmailSent === "function") {
+    try {
+      await deps.repository.markAdminEmailSent(reservation.id);
+    } catch (error) {
+      reportError(deps, error, "Could not record admin email delivery.");
+    }
   }
 
   if (typeof deps.email.sendVisitorPendingEmail === "function") {
