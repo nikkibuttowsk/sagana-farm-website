@@ -160,6 +160,27 @@ export async function postReservation(request, deps) {
   }
 
   try {
+    // Same submit seen before (double click, retry)? Answer with the original result.
+    // This runs BEFORE rate limiting, so a repeat does not use up the visitor's allowance.
+    if (
+      validation.value.idempotencyKey &&
+      typeof deps.findReplayedReservation === "function"
+    ) {
+      const replay = await deps.findReplayedReservation(validation.value);
+
+      if (replay) {
+        return jsonResponse(
+          {
+            saved: true,
+            reference: replay.reference,
+            notificationSent: replay.notificationSent,
+            replayed: true,
+          },
+          replay.notificationSent ? 200 : 503,
+        );
+      }
+    }
+
     const rateLimit = await deps.claimReservationRateLimit(
       validation.value,
       request,
@@ -184,8 +205,9 @@ export async function postReservation(request, deps) {
         saved: true,
         reference: result.reference,
         notificationSent: result.notificationSent,
+        ...(result.replayed ? { replayed: true } : {}),
       },
-      result.notificationSent ? 201 : 503,
+      result.replayed ? 200 : result.notificationSent ? 201 : 503,
     );
   } catch (error) {
     reportError(deps, error, "Could not save farm reservation.");

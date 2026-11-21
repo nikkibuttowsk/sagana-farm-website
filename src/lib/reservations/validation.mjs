@@ -1,7 +1,9 @@
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Philippine mobile: 09XXXXXXXXX, 639XXXXXXXXX or +639XXXXXXXXX (the 9 plus 9 more digits).
 const PH_MOBILE_PATTERN = /^(?:\+63|63|0)(9\d{9})$/;
+// Other countries: "+" then 8 to 15 digits (E.164 length rules).
 const INTERNATIONAL_PATTERN = /^\+[1-9]\d{7,14}$/;
 
 export class ReservationValidationError extends Error {
@@ -75,6 +77,10 @@ export function validateReservation(
   const guestCount = input?.guestCount;
   const visitDate =
     typeof input?.visitDate === "string" ? input.visitDate : "";
+  const idempotencyKey =
+    typeof input?.idempotencyKey === "string"
+      ? input.idempotencyKey.trim().toLowerCase()
+      : "";
 
   if (visitorName.length < 1 || visitorName.length > 120) {
     errors.visitorName = "Enter a name between 1 and 120 characters.";
@@ -89,6 +95,10 @@ export function validateReservation(
 
   if (!visitorPhone) {
     errors.visitorPhone = "Enter a valid mobile number, like 0917 123 4567.";
+  }
+
+  if (idempotencyKey && !UUID_PATTERN.test(idempotencyKey)) {
+    errors.idempotencyKey = "Request key is invalid.";
   }
 
   if (!UUID_PATTERN.test(farmId)) {
@@ -125,6 +135,7 @@ export function validateReservation(
       timeSlotId: timeSlotId.toLowerCase(),
       guestCount,
       visitDate,
+      ...(idempotencyKey ? { idempotencyKey } : {}),
     },
   };
 }
