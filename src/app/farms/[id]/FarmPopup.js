@@ -28,6 +28,30 @@ function parseSeason(text) {
   return flags;
 }
 
+// Turns a YouTube link (watch, youtu.be, shorts, embed) into a privacy-friendly embed URL.
+// Returns null for anything that is not a real YouTube video link.
+function getYouTubeEmbedUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "").replace(/^m\./, "");
+    let id = null;
+
+    if (host === "youtu.be") {
+      id = url.pathname.slice(1).split("/")[0];
+    } else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts[0] === "watch") id = url.searchParams.get("v");
+      else if (["shorts", "embed", "live", "v"].includes(parts[0])) id = parts[1];
+    }
+
+    return id && /^[A-Za-z0-9_-]{11}$/.test(id)
+      ? `https://www.youtube-nocookie.com/embed/${id}`
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId }) {
   const router = useRouter();
   const [current, setCurrent] = useState(0);
@@ -40,8 +64,11 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
   const wrapperRef = useRef(null);
   const chatLogRef = useRef(null);
 
+  const youTubeEmbed = videoUrl ? getYouTubeEmbedUrl(videoUrl) : null;
   const slides = [
-    ...(videoUrl ? [{ type: "video", src: videoUrl }] : []),
+    ...(videoUrl
+      ? [youTubeEmbed ? { type: "youtube", src: youTubeEmbed } : { type: "video", src: videoUrl }]
+      : []),
     ...imageUrls.map((src) => ({ type: "photo", src })),
   ];
 
@@ -173,7 +200,18 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
                 className={`carousel-slide${i === current ? " active" : ""}`}
                 data-type={slide.type}
               >
-                {slide.type === "video" ? (
+                {slide.type === "youtube" ? (
+                  i === current ? (
+                    <iframe
+                      src={slide.src}
+                      title={`${farm.name} video walkthrough`}
+                      allow="accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      loading="lazy"
+                    />
+                  ) : null
+                ) : slide.type === "video" ? (
                   <video controls preload="metadata" poster={imageUrls[0] || undefined}>
                     <source src={slide.src} type="video/mp4" />
                   </video>
@@ -192,7 +230,7 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
           {slides.length > 0 && (
             <span className="slide-counter">{current + 1} / {slides.length}</span>
           )}
-          {slides[current]?.type === "video" && (
+          {(slides[current]?.type === "video" || slides[current]?.type === "youtube") && (
             <span className="slide-badge">Video Walkthrough</span>
           )}
 
