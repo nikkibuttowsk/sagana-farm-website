@@ -1,11 +1,9 @@
-
 body:has(.farm-page-container) { background: var(--surface); min-height: 100vh; }
 body:has(.farm-page-container) { display: flex; flex-direction: column; }
-body:has(.farm-page-container) #site-footer { margin-top: auto; }   /* footer sits at the bottom when nothing is open */
+body:has(.farm-page-container) #site-footer { margin-top: auto; }
 html.farm-open { overflow: hidden; }
-html.farm-open #site-footer { display: none; }   /* the pop-up sits over the page, so no footer behind it */
+html.farm-open #site-footer { display: none; }
 
-/* anything the JS marks hidden stays hidden, whatever display it has */
 .farm-page-container [hidden] { display: none !important; }
 
 /* ---------- Nothing selected ---------- */
@@ -27,16 +25,28 @@ html.farm-open .no-farm { display: none; }
 .farm-page-container {
     display: none;
     position: fixed;
-    inset: var(--header-h) 0 0 0;          /* centred in the space under the header */
+    inset: var(--header-h) 0 0 0;
     margin: auto;
-    z-index: 400;
+    z-index: 1000;
     width: min(1040px, calc(100vw - 9rem));
     height: min(640px, calc(100vh - var(--header-h) - 3rem));
-    --media: 56.5217%;                      /* width of the photo column */
+    --media: 56.5217%;
     grid-template-columns: var(--media) 1fr;
     background: var(--white);
     border-radius: 24px;
     box-shadow: 0 24px 60px rgba(20, 38, 27, 0.18);
+
+    --header-h: 86px;
+    --white: #fff;
+    --surface: #f3f6f1;
+    --border: #dde5d9;
+    --muted: #5f6f64;
+    --text: #1f2a22;
+    --color-primary: #14261b;
+    --color-secondary: #2e6b3d;
+    --color-tertiary: #e3eddf;
+    --radius-sm: 8px;
+    --radius-pill: 999px;
 }
 html.farm-open .farm-page-container {
     display: grid;
@@ -47,9 +57,13 @@ html.farm-open .farm-page-container {
     to   { opacity: 1; transform: none; }
 }
 
+/* closing: fade and shrink */
+html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease forwards; }
+@keyframes farmClose {
+    to { opacity: 0; transform: translateY(14px) scale(0.98); }
+}
+
 /* ---------- Left: photos / video ---------- */
-/* these two wrappers add no box, so the photo, counter, dots and arrows
-   all position against the pop-up itself (lets the arrows sit outside it) */
 .farm-primary-content,
 .media-carousel-container { display: contents; }
 .carousel-wrapper {
@@ -77,8 +91,14 @@ html.farm-open .farm-page-container {
     object-fit: cover;
     background: var(--color-primary);
 }
+.carousel-slide iframe { width: 100%; height: 100%; border: 0; }
+.carousel-slide.active img { animation: photoIn 0.5s ease; }
+@keyframes photoIn {
+    from { transform: scale(1.04); }
+    to   { transform: scale(1); }
+}
 
-/* "1 / 4" counter and the video label */
+/* counter and the video label */
 .slide-counter,
 .slide-badge {
     position: absolute;
@@ -94,8 +114,6 @@ html.farm-open .farm-page-container {
 }
 .slide-counter { left: 1rem; }
 .slide-badge { right: 1rem; }
-.slide-counter[hidden],
-.farm-page-container .carousel-dots[hidden] { display: none; }
 
 /* dots pill, bottom centre of the photo */
 .farm-page-container .carousel-dots {
@@ -111,8 +129,9 @@ html.farm-open .farm-page-container {
     backdrop-filter: blur(8px);
     border-radius: var(--radius-pill);
 }
-/* on the video slide, lift the dots above the player's control bar */
-.farm-page-container:has(.carousel-slide.active[data-type="video"]) .carousel-dots { bottom: 4.5rem; }
+/* on a video slide, lift the dots above the player's control bar */
+.farm-page-container:has(.carousel-slide.active[data-type="video"]) .carousel-dots,
+.farm-page-container:has(.carousel-slide.active[data-type="youtube"]) .carousel-dots { bottom: 4.5rem; }
 .farm-page-container .carousel-dots span {
     width: 7px;
     height: 7px;
@@ -146,7 +165,8 @@ html.farm-open .farm-page-container {
 .farm-nav.prev { left: -4.25rem; }
 .farm-nav.next { right: -4.25rem; }
 
-/* small arrows INSIDE the picture: previous / next photo or video */
+/* small arrows INSIDE the picture: previous / next photo or video.
+   Same position on every slide (photo, video, YouTube). */
 .media-arrow {
     position: absolute;
     top: 50%;
@@ -166,9 +186,9 @@ html.farm-open .farm-page-container {
     transition: background 0.2s, color 0.2s;
 }
 .media-arrow:hover { background: var(--color-secondary); color: var(--white); }
+.media-arrow:active { transform: translateY(-50%) scale(0.9); }
 .media-arrow.prev { left: 1rem; }
 .media-arrow.next { left: calc(var(--media) - 1rem - 38px); }
-.farm-nav svg, .media-arrow svg { width: 20px; height: 20px; }
 
 /* ---------- Right: details ---------- */
 .farm-info-sidebar {
@@ -192,7 +212,7 @@ html.farm-open .farm-page-container {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    z-index: 6;
+    z-index: 1001;
     width: 38px;
     height: 38px;
     border: 0;
@@ -205,6 +225,9 @@ html.farm-open .farm-page-container {
 }
 .farm-close:hover { background: var(--color-secondary); color: var(--white); }
 
+/* mobile-only farm switch row (hidden on desktop) */
+.farm-switch-row { display: none; }
+
 .farm-type {
     display: block;
     margin: 0 2.5rem 0.35rem 0;
@@ -215,7 +238,7 @@ html.farm-open .farm-page-container {
     color: var(--color-secondary);
 }
 .sidebar-card h1 {
-    margin: 0 3rem 0.4rem 0;               /* keeps the title clear of the X button */
+    margin: 0 3rem 0.4rem 0;
     font-size: clamp(1.5rem, 2.3vw, 1.9rem);
     font-weight: 800;
     line-height: 1.15;
@@ -226,19 +249,12 @@ html.farm-open .farm-page-container {
 .rating .star { color: #e0a100; }
 .location-sub { margin: 0 0 0.75rem; font-size: 0.85rem; color: var(--muted); }
 .sidebar-card > hr { margin: 0.9rem 0; border: 0; border-top: 1px solid var(--border); }
-.sidebar-card > h3 {
-    margin: 0 0 0.3rem;
-    font-size: 0.8rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--muted);
-}
-.sidebar-card > p { font-size: 0.9rem; color: var(--text); }
+.sidebar-card > p { margin-top: 0; font-size: 0.9rem; color: var(--text); }
 
 /* info rows: label | value */
 .info-list {
     display: grid;
-    grid-template-columns: max-content 1fr;
+    grid-template-columns: 5.5rem 1fr;
     margin: 0 0 1.25rem;
     font-size: 0.88rem;
 }
@@ -248,21 +264,28 @@ html.farm-open .farm-page-container {
     padding: 0.7rem 0;
     border-top: 1px solid var(--border);
 }
-.info-list dt { padding-right: 1.25rem; font-weight: 600; color: var(--color-primary); }
-.info-list dd { color: var(--text); }
-.info-list a { font-weight: 600; text-decoration: underline; white-space: nowrap; }
-.info-list .pill {
-    display: inline-block;
-    margin-right: 0.5rem;
-    padding: 0.1rem 0.6rem;
-    border-radius: var(--radius-pill);
-    background: var(--color-tertiary);
+.info-list dt { padding-right: 1rem; font-weight: 600; color: var(--color-primary); }
+.info-list dd { color: var(--text); min-width: 0; overflow-wrap: anywhere; }
+
+/* Contact row: phone link, kept on one line */
+.info-list .contact-link {
+    font-weight: 600;
     color: var(--color-secondary);
-    font-size: 0.75rem;
-    font-weight: 700;
+    text-decoration: underline;
+    white-space: nowrap;
 }
 
-/* sections inside the details (cancel the site-wide <section> padding and width cap) */
+/* Location row: address, then the Directions link underneath */
+.info-list .loc-text { display: block; }
+.info-list .directions-link {
+    display: inline-block;
+    margin-top: 0.3rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    text-decoration: underline;
+    white-space: nowrap;
+}
+
 .farm-section { margin: 0 0 1.25rem; padding: 0; }
 .farm-section > * { max-width: none; margin-left: 0; margin-right: 0; }
 .farm-section h2 {
@@ -301,16 +324,25 @@ html.farm-open .farm-page-container {
     font-weight: 500;
 }
 
-.sidebar-card > .btn { margin-bottom: 1.25rem; }
-
-/* When the page has no bottom bar (.farm-cta-bar), the Reserve button stays pinned to the
-   bottom of the details while they scroll */
-.sidebar-card > a.btn-primary {
-    position: sticky;
-    bottom: 0.5rem;
-    z-index: 2;
-    margin-bottom: 1rem;
-    box-shadow: 0 0 0 0.6rem var(--white);       /* white ring hides text scrolling underneath */
+/* buttons */
+.farm-page-container .btn {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-secondary);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+.farm-page-container .btn:hover { background: var(--color-primary); }
+.farm-page-container .btn.pop { animation: farmPop2 0.35s ease; }
+@keyframes farmPop2 {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
 }
 
 /* chat */
@@ -331,6 +363,11 @@ html.farm-open .farm-page-container {
     border-radius: 14px;
     font-size: 0.85rem;
 }
+.chat-log .msg { animation: msgIn 0.25s ease; }
+@keyframes msgIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+}
 .bot-msg { align-self: flex-start; background: var(--white); border: 1px solid var(--border); }
 .user-msg { align-self: flex-end; background: var(--color-secondary); color: var(--white); }
 .chat-input-form { display: flex; gap: 0.5rem; }
@@ -348,8 +385,9 @@ html.farm-open .farm-page-container {
     border-color: var(--color-secondary);
     box-shadow: 0 0 0 3px rgba(46, 107, 61, 0.2);
 }
+.chat-input-form .btn { padding: 0.6rem 1.1rem; }
 
-/* bottom bar: price + Book now (always visible) */
+/* bottom bar: price + Book now */
 .farm-cta-bar {
     display: flex;
     align-items: center;
@@ -360,7 +398,6 @@ html.farm-open .farm-page-container {
     border-top: 1px solid var(--border);
     position: relative;
 }
-/* soft fade so scrolling details don't get cut off sharply above the bar */
 .farm-cta-bar::before {
     content: "";
     position: absolute;
@@ -373,14 +410,12 @@ html.farm-open .farm-page-container {
 }
 .farm-cta-bar .price { margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--color-primary); }
 .farm-cta-bar .price span { font-size: 0.82rem; font-weight: 400; color: var(--muted); }
-.farm-cta-bar .price .amount { font-size: 1.15rem; font-weight: 800; color: var(--color-primary); }
 .farm-cta-bar .btn { padding: 0.75rem 2rem; }
 
 /* ---------- Tablets / phones: full-screen sheet ---------- */
 @media (max-width: 900px) {
     .farm-page-container {
         inset: 0;
-        z-index: 700;
         width: 100%;
         height: 100%;
         grid-template-columns: 1fr;
@@ -389,109 +424,68 @@ html.farm-open .farm-page-container {
         box-shadow: none;
     }
     .carousel-wrapper { bottom: auto; width: 100%; height: 280px; border-radius: 0; }
-    .farm-page-container .carousel-dots { left: 50%; bottom: auto; top: 280px; margin-top: -4.2rem; }
-    .slide-badge { right: 4rem; }          /* keep clear of the close button */
-    .farm-info-sidebar { grid-column: 1; grid-row: 2; }
-    .media-arrow { top: 140px; }
-    .media-arrow.next { left: auto; right: 0.75rem; }
-    .farm-nav { top: 280px; margin-top: -3.4rem; width: 40px; height: 40px; background: rgba(255, 255, 255, 0.92); }
-    .farm-nav:active { transform: translateY(-50%) scale(0.94); }
-    .farm-nav.prev { left: 0.75rem; }
-    .farm-nav.next { right: 0.75rem; }
-    .farm-close { background: rgba(255, 255, 255, 0.9); }
-    .farm-info-sidebar { border-radius: 0; }
+    .farm-info-sidebar { grid-column: 1; grid-row: 2; border-radius: 0; }
     .sidebar-card { padding: 1.25rem 1.25rem 1rem; }
-    .farm-cta-bar { padding: 0.85rem 1.25rem; }
     .sidebar-card h1 { margin-right: 0; }
-    .info-list a { white-space: normal; }
+    .farm-cta-bar { padding: 0.85rem 1.25rem; }
     .farm-type { margin-right: 0; }
+    .farm-close { background: rgba(255, 255, 255, 0.9); }
+
+    /* one pair of arrows on the photo: round farm arrows are hidden,
+       farm switching uses the labelled buttons in the details */
+    .farm-nav { display: none; }
+
+    .farm-switch-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .farm-switch-row button {
+        padding: 0.4rem 0.9rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--white);
+        color: var(--color-primary);
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .farm-switch-row button:active { background: var(--color-tertiary); }
+
+    /* photo arrows: one fixed spot on every slide */
+    .media-arrow { top: 140px; width: 34px; height: 34px; }
+    .media-arrow.prev { left: 0.6rem; }
+    .media-arrow.next { left: auto; right: 0.6rem; }
+
+    /* dots: fixed pill near the bottom of the 280px photo area (top only,
+       so bottom can never stretch it). Lifted above video controls. */
+    .farm-page-container .carousel-dots {
+        left: 50%;
+        bottom: auto;
+        top: 280px;
+        margin-top: -2.6rem;
+    }
+    .farm-page-container:has(.carousel-slide.active[data-type="video"]) .carousel-dots,
+    .farm-page-container:has(.carousel-slide.active[data-type="youtube"]) .carousel-dots {
+        bottom: auto;
+        top: 280px;
+        margin-top: -6rem;
+    }
+
+    .slide-counter { left: 0.75rem; top: 0.75rem; }
+    .slide-badge { top: 0.75rem; right: 3.6rem; }
 }
 @media (max-width: 420px) {
     .season-chips { grid-template-columns: repeat(4, 1fr); }
-}
-@media (prefers-reduced-motion: reduce) {
-    html.farm-open .farm-page-container { animation: none; }
-    .carousel-slide { transition: none; }
-}
-
-/* values the old site defined globally; scoped here so nothing else changes */
-.farm-page-container {
-    --header-h: 86px;               /* set this to your real header height */
-    --white: #fff;
-    --surface: #f3f6f1;
-    --border: #dde5d9;
-    --muted: #5f6f64;
-    --text: #1f2a22;
-    --color-primary: #14261b;
-    --color-secondary: #2e6b3d;
-    --color-tertiary: #e3eddf;
-    --radius-sm: 8px;
-    --radius-pill: 999px;
-    z-index: 1000;                  /* above the site header */
-}
-body:has(.farm-page-container) { --surface: #f3f6f1; }
-.farm-close { z-index: 1001; }
-
-/* buttons */
-.farm-page-container .btn {
-    display: inline-block;
-    padding: 0.6rem 1.4rem;
-    border: 0;
-    border-radius: 999px;
-    background: var(--color-secondary);
-    color: #fff;
-    font: inherit;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-}
-.farm-page-container .btn:hover { background: var(--color-primary); }
-.farm-cta-bar .btn { padding: 0.75rem 2rem; }
-.farm-cta-bar .price { font-size: 1.15rem; }
-.chat-input-form .btn { padding: 0.6rem 1.1rem; }
-.sidebar-card > p, .sidebar-card .farm-section h2 { margin-top: 0; }
-/* Send button bounce */
-.farm-page-container .btn.pop { animation: farmPop2 0.35s ease; }
-@keyframes farmPop2 {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-
-/* closing: fade and shrink */
-html.farm-open .farm-page-container.closing {
-  animation: farmClose 0.25s ease forwards;
-}
-@keyframes farmClose {
-  to { opacity: 0; transform: translateY(14px) scale(0.98); }
-}
-
-/* arrows inside the photo: press effect that keeps them centred */
-.media-arrow:active { transform: translateY(-50%) scale(0.9); }
-
-/* new chat messages slide in */
-.chat-log .msg { animation: msgIn 0.25s ease; }
-@keyframes msgIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* photo eases in when the slide changes */
-.carousel-slide.active img { animation: photoIn 0.5s ease; }
-@keyframes photoIn {
-  from { transform: scale(1.04); }
-  to   { transform: scale(1); }
+    .info-list { grid-template-columns: 4.75rem 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .farm-page-container .btn.pop,
+    html.farm-open .farm-page-container,
     html.farm-open .farm-page-container.closing,
+    .farm-page-container .btn.pop,
     .chat-log .msg,
     .carousel-slide.active img { animation: none; }
-}
-
-.carousel-slide iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
+    .carousel-slide { transition: none; }
 }

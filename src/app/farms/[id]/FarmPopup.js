@@ -57,12 +57,13 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
   const [current, setCurrent] = useState(0);
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
-  const [sent, setSent] = useState(false);       // Send button bounce
-  const [closing, setClosing] = useState(false); // pop-up closing animation
-  const [thinking, setThinking] = useState(false);        // waiting for the AI
-  const [pendingQuestion, setPendingQuestion] = useState(null); // set when we need the visitor's email
+  const [sent, setSent] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const [thinking, setThinking] = useState(false);
+  const [pendingQuestion, setPendingQuestion] = useState(null);
   const wrapperRef = useRef(null);
   const chatLogRef = useRef(null);
+  const touchX = useRef(null);
 
   const youTubeEmbed = videoUrl ? getYouTubeEmbedUrl(videoUrl) : null;
   const slides = [
@@ -71,28 +72,27 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
       : []),
     ...imageUrls.map((src) => ({ type: "photo", src })),
   ];
+  const hasMany = slides.length > 1;
+  const currentIsVideo =
+    slides[current]?.type === "video" || slides[current]?.type === "youtube";
 
-  // play the closing animation, then leave the page
   const closePopup = () => {
     if (closing) return;
     setClosing(true);
     setTimeout(() => router.push("/farm"), 250);
   };
 
-  // open the pop-up (CSS needs "farm-open" on <html>)
   useEffect(() => {
     document.documentElement.classList.add("farm-open");
     return () => document.documentElement.classList.remove("farm-open");
   }, []);
 
-  // pause the video when it is not the visible slide
   useEffect(() => {
     if (slides[current]?.type !== "video") {
       wrapperRef.current?.querySelectorAll("video").forEach((v) => v.pause());
     }
   }, [current]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // keyboard: left / right arrows move between farms
   useEffect(() => {
     const onKey = (e) => {
       if (e.target.closest?.("input, textarea, video")) return;
@@ -104,15 +104,25 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
     return () => document.removeEventListener("keydown", onKey);
   }, [prevId, nextId, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // keep the chat scrolled to the newest message
   useEffect(() => {
     if (chatLogRef.current) chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
   }, [messages, thinking]);
 
   const go = (step) => setCurrent((i) => (i + step + slides.length) % slides.length);
 
-  // Sends the visitor's question to the AI route. If the AI can't answer, the next
-  // message the visitor types is treated as their email so the farm can reply.
+  // swipe on photos only, so scrubbing a video never changes the slide
+  const onTouchStart = (e) => {
+    touchX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e) => {
+    if (touchX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    touchX.current = null;
+    if (hasMany && !currentIsVideo && Math.abs(dx) > 50) {
+      go(dx < 0 ? 1 : -1);
+    }
+  };
+
   const sendChat = async (e) => {
     e.preventDefault();
     const text = draft.trim();
@@ -138,7 +148,6 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // keep pendingQuestion so a mistyped email can be corrected
         reply(data.error || "Sorry, something went wrong. Please try again.");
       } else if (data.status === "answered") {
         setPendingQuestion(null);
@@ -163,7 +172,6 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
     }
   };
 
-  // header info
   const place =
     farm.province && !farm.location.toLowerCase().includes(farm.province.toLowerCase())
       ? [farm.location, farm.province].filter(Boolean).join(", ")
@@ -174,7 +182,6 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
       ? `https://www.google.com/maps/search/?api=1&query=${farm.latitude},${farm.longitude}`
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${farm.name} ${farm.location}`)}`;
 
-  // harvest-season chips, starting at the first harvest month
   const flags = parseSeason(farm.bearingSeason);
   const anyOn = flags.some(Boolean);
   const start =
@@ -190,7 +197,12 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
     <div className={`farm-page-container${closing ? " closing" : ""}`}>
       <div className="farm-primary-content">
         <div className="media-carousel-container">
-          <div className="carousel-wrapper" ref={wrapperRef}>
+          <div
+            className="carousel-wrapper"
+            ref={wrapperRef}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
             {slides.length === 0 && (
               <p style={{ color: "#fff", padding: "2rem" }}>No photos available yet.</p>
             )}
@@ -227,14 +239,13 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
             ))}
           </div>
 
-          {slides.length > 0 && (
+          {/* counter, dots and arrows only exist when there is more than one slide */}
+          {hasMany && (
             <span className="slide-counter">{current + 1} / {slides.length}</span>
           )}
-          {(slides[current]?.type === "video" || slides[current]?.type === "youtube") && (
-            <span className="slide-badge">Video Walkthrough</span>
-          )}
+          {currentIsVideo && <span className="slide-badge">Video Walkthrough</span>}
 
-          {slides.length > 1 && (
+          {hasMany && (
             <>
               <div className="carousel-dots">
                 {slides.map((_, i) => (
@@ -263,6 +274,21 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
 
       <aside className="farm-info-sidebar">
         <div className="sidebar-card">
+          {(prevId || nextId) && (
+            <div className="farm-switch-row">
+              {prevId ? (
+                <button type="button" onClick={() => router.push(`/farms/${encodeURIComponent(prevId)}`)}>
+                  &#8249; Previous farm
+                </button>
+              ) : <span />}
+              {nextId ? (
+                <button type="button" onClick={() => router.push(`/farms/${encodeURIComponent(nextId)}`)}>
+                  Next farm &#8250;
+                </button>
+              ) : <span />}
+            </div>
+          )}
+
           {farm.type && <span className="farm-type">{farm.type}</span>}
           <h1>{farm.name}</h1>
 
@@ -284,16 +310,22 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
             <dd>{farm.crops.length ? farm.crops.join(", ") : "Fresh produce"}</dd>
             <dt>Season</dt>
             <dd>{farm.bearingSeason || "N/A"}</dd>
-            {farm.phone && (
-              <>
-                <dt>Phone</dt>
-                <dd><a href={`tel:${farm.phone.replace(/[^\d+]/g, "")}`}>{farm.phone}</a></dd>
-              </>
-            )}
+            <dt>Contact</dt>
+            <dd>
+              {farm.phone ? (
+                <a className="contact-link" href={`tel:${farm.phone.replace(/[^\d+]/g, "")}`}>
+                  {farm.phone}
+                </a>
+              ) : (
+                "Not listed"
+              )}
+            </dd>
             <dt>Location</dt>
             <dd>
-              {farm.location || farm.province}{" "}
-              <a href={directions} target="_blank" rel="noopener noreferrer">Directions</a>
+              <span className="loc-text">{farm.location || farm.province}</span>
+              <a className="directions-link" href={directions} target="_blank" rel="noopener noreferrer">
+                Directions
+              </a>
             </dd>
           </dl>
 
