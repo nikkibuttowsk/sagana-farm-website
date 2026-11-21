@@ -1082,3 +1082,30 @@
 @media (max-width: 40rem) {
   .progressLabel { font-size: 0.65rem; }
 }
+/* ===== selected farm card: keep the dropdown from squeezing the name ===== */
+.farmSwitch {
+  min-width: 0;
+  max-width: 100%;
+}
+.selectSmall {
+  max-width: 14rem;
+  text-overflow: ellipsis;
+}
+.farmTitle,
+.farmLocation {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 40rem) {
+  .farmCardRow {
+    flex-wrap: wrap;
+  }
+  /* dropdown drops onto its own full-width line under photo + name */
+  .farmSwitch {
+    flex: 0 0 100%;
+  }
+  .selectSmall {
+    width: 100%;
+    max-width: 100%;
+  }
+}
