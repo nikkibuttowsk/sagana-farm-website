@@ -1,7 +1,8 @@
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\+?[0-9][0-9\s().-]*$/;
+const PH_MOBILE_PATTERN = /^(?:\+63|63|0)(9\d{9})$/;
+const INTERNATIONAL_PATTERN = /^\+[1-9]\d{7,14}$/;
 
 export class ReservationValidationError extends Error {
   constructor(errors) {
@@ -9,6 +10,24 @@ export class ReservationValidationError extends Error {
     this.name = "ReservationValidationError";
     this.errors = errors;
   }
+}
+
+// Returns a clean number like +639171234567, or null if it isn't valid.
+function normalizePhone(value) {
+  // allow spaces, dashes, dots and brackets while typing: "0917 123-4567"
+  const compact = value.replace(/[\s().-]/g, "");
+  const ph = compact.match(PH_MOBILE_PATTERN);
+
+  if (ph) {
+    return `+63${ph[1]}`;
+  }
+
+  // a +63 number that isn't a valid mobile number is rejected
+  if (compact.startsWith("+63")) {
+    return null;
+  }
+
+  return INTERNATIONAL_PATTERN.test(compact) ? compact : null;
 }
 
 function manilaDate(date) {
@@ -47,15 +66,15 @@ export function validateReservation(
     typeof input?.visitorEmail === "string"
       ? input.visitorEmail.trim().toLowerCase()
       : "";
-  const visitorPhone =
+  const rawPhone =
     typeof input?.visitorPhone === "string" ? input.visitorPhone.trim() : "";
+  const visitorPhone = rawPhone.length <= 32 ? normalizePhone(rawPhone) : null;
   const farmId = typeof input?.farmId === "string" ? input.farmId : "";
   const timeSlotId =
     typeof input?.timeSlotId === "string" ? input.timeSlotId : "";
   const guestCount = input?.guestCount;
   const visitDate =
     typeof input?.visitDate === "string" ? input.visitDate : "";
-  const phoneDigits = visitorPhone.replace(/\D/g, "");
 
   if (visitorName.length < 1 || visitorName.length > 120) {
     errors.visitorName = "Enter a name between 1 and 120 characters.";
@@ -68,13 +87,8 @@ export function validateReservation(
     errors.visitorEmail = "Enter a valid email address.";
   }
 
-  if (
-    visitorPhone.length > 32 ||
-    !PHONE_PATTERN.test(visitorPhone) ||
-    phoneDigits.length < 7 ||
-    phoneDigits.length > 20
-  ) {
-    errors.visitorPhone = "Enter a valid phone number.";
+  if (!visitorPhone) {
+    errors.visitorPhone = "Enter a valid mobile number, like 0917 123 4567.";
   }
 
   if (!UUID_PATTERN.test(farmId)) {

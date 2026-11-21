@@ -299,3 +299,15 @@ export async function claimTicketEmailRetry(
 
   return { id, ...details };
 }
+
+export async function getActiveFarmIds(client) {
+  const { data, error } = await client
+    .from("farms")
+    .select("id")
+    .eq("is_active", true)
+    .order("name", { ascending: true });
+
+  throwOnError(error);
+
+  return Array.isArray(data) ? data : [];
+}

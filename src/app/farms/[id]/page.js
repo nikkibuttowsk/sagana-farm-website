@@ -6,7 +6,7 @@ import { ServerConfigurationError } from "@/lib/config/env.mjs";
 import { getFarmImageUrls, getFarmVideoUrl } from "@/lib/homepage.mjs";
 import {
   getActiveFarmById,
-  getActiveFarms,
+  getActiveFarmIds,
 } from "@/lib/reservations/repository.mjs";
 import { createPublicSupabaseClient } from "@/lib/supabase/clients.mjs";
 import FarmPopup from "./FarmPopup";
@@ -37,8 +37,11 @@ export default async function FarmDetailsPage({ params }) {
 
   try {
     const supabase = createPublicSupabaseClient();
-    farm = await getActiveFarmById(supabase, id);
-    allFarms = await getActiveFarms(supabase);
+    // run both queries at the same time instead of one after the other
+    [farm, allFarms] = await Promise.all([
+      getActiveFarmById(supabase, id),
+      getActiveFarmIds(supabase),
+    ]);
   } catch (error) {
     if (error instanceof ServerConfigurationError) {
       return (
