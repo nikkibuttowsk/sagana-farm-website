@@ -15,7 +15,13 @@ import { postReservation } from "@/lib/reservations/http.mjs";
 import {
   claimReservationSubmissionRateLimit,
   createPendingReservation,
+  findReplayedReservation,
+  markAdminEmailSent,
 } from "@/lib/reservations/repository.mjs";
+
+// A repeat that arrives while the first request is still sending its emails
+// should not look like a failure.
+const IN_FLIGHT_WINDOW_MS = 60 * 1000;
 
 export async function POST(request) {
   let appBaseUrl;
@@ -38,6 +44,21 @@ export async function POST(request) {
 
   return postReservation(request, {
     appBaseUrl,
+    async findReplayedReservation(input) {
+      const existing = await findReplayedReservation(input, getAdminClient());
+
+      if (!existing) {
+        return null;
+      }
+
+      const createdAt = new Date(existing.created_at).getTime();
+      const stillSending = Date.now() - createdAt < IN_FLIGHT_WINDOW_MS;
+
+      return {
+        reference: existing.id,
+        notificationSent: Boolean(existing.admin_email_sent_at) || stillSending,
+      };
+    },
     async claimReservationRateLimit(input, currentRequest) {
       const { RATE_LIMIT_SECRET } = requireServerEnv(["RATE_LIMIT_SECRET"]);
       const clientIp = getTrustedClientIp(currentRequest);
@@ -62,6 +83,8 @@ export async function POST(request) {
               retryHash,
               getAdminClient(),
             ),
+          markAdminEmailSent: (reservationId) =>
+            markAdminEmailSent(reservationId, getAdminClient()),
         },
         email: {
           sendAdminReservationEmail: (reservation, urls) =>
