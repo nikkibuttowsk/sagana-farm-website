@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import "./site-header.css";
-import NavLinks from "./NavLinks";
+import HeaderNav from "./HeaderNav";
 
 export default function SiteHeader() {
   return (
@@ -18,9 +18,7 @@ export default function SiteHeader() {
         <span>SAGANA</span>
       </Link>
 
-      <nav aria-label="Main navigation">
-        <NavLinks />
-      </nav>
+      <HeaderNav />
 
       <search>
         <form action="/farm" method="get" role="search">
