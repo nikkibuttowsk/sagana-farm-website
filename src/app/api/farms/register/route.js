@@ -1,9 +1,30 @@
+import crypto from "node:crypto";
 import { createAdminSupabaseClient } from "@/lib/supabase/clients.mjs";
-import { createEmailClient } from "@/lib/email/client.mjs";
+import {
+  createEmailClient,
+  sendAdminFarmRegistrationEmail,
+  sendFarmOwnerPendingEmail,
+} from "@/lib/email/client.mjs";
 import { requireServerEnv } from "@/lib/config/env.mjs";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const URL_PATTERN = /^https?:\/\/.+/i;
+
+function createFarmReviewToken(farmId, secret) {
+  const payload = Buffer.from(
+    JSON.stringify({
+      farmId,
+      exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days expiry
+    }),
+  ).toString("base64url");
+
+  const signature = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("base64url");
+
+  return `${payload}.${signature}`;
+}
 
 export async function POST(request) {
   let body;
@@ -70,9 +91,6 @@ export async function POST(request) {
       .filter(Boolean);
     const imagesArray = imageUrl ? [imageUrl] : [];
 
-    const normalizedSeason = season.toLowerCase();
-  
-
     const { data, error } = await supabase
       .from("farms")
       .insert({
@@ -95,10 +113,9 @@ export async function POST(request) {
         is_active: false,
         is_trending: false,
       })
-      .select("id, name")
+      .select("*")
       .single();
 
-    // check the insert BEFORE using data.id
     if (error || !data) {
       console.error("Failed to insert farm registration:", error);
       return Response.json(
@@ -107,7 +124,7 @@ export async function POST(request) {
       );
     }
 
-    // seed default time slots so the farm is ready for bookings once approved
+    // Seed default time slots so the farm is ready for bookings once approved
     const defaultSlots = [
       { farm_id: data.id, label: "08:00 - 10:00", sort_order: 1, is_active: true },
       { farm_id: data.id, label: "10:00 - 12:00", sort_order: 2, is_active: true },
@@ -123,30 +140,29 @@ export async function POST(request) {
       console.error("Failed to seed default farm time slots:", slotsError);
     }
 
-    // Notify SAGANA platform admin via Brevo (best-effort)
+    // Send styled admin approval email + owner confirmation receipt
     try {
-      const { FARM_ADMIN_EMAIL, RESERVATION_FROM_EMAIL } = requireServerEnv([
-        "FARM_ADMIN_EMAIL",
-        "RESERVATION_FROM_EMAIL",
+      const { SUPABASE_SERVICE_ROLE_KEY } = requireServerEnv([
+        "SUPABASE_SERVICE_ROLE_KEY",
       ]);
+
+      const origin = new URL(request.url).origin;
+      const token = createFarmReviewToken(data.id, SUPABASE_SERVICE_ROLE_KEY);
+      const actionUrl = `${origin}/farms/review?token=${encodeURIComponent(token)}`;
+
       const emailClient = createEmailClient();
-      await emailClient.emails.send({
-        from: RESERVATION_FROM_EMAIL,
-        to: FARM_ADMIN_EMAIL,
-        subject: `New farm registration: ${name} (${province})`,
-        text: `A new farm registered on SAGANA:\n\nFarm: ${name}\nProvince: ${province}\nAddress: ${location}\nOwner Email: ${adminEmail}\nCrops: ${crops}\nSeason: ${season}\nVideo: ${videoUrl}\n\nReview in Supabase (farms table, ID: ${data.id}) and set is_active = true to publish.`,
-        html: `<h2>New Farm Registration</h2>
-            <p><strong>Farm:</strong> ${name}</p>
-            <p><strong>Province:</strong> ${province}</p>
-            <p><strong>Address:</strong> ${location}</p>
-            <p><strong>Owner Email:</strong> ${adminEmail}</p>
-            <p><strong>Crops:</strong> ${crops}</p>
-            <p><strong>Season:</strong> ${season}</p>
-            <p><strong>Video:</strong> <a href="${videoUrl}">${videoUrl}</a></p>
-            <p>Open your Supabase <code>farms</code> table (ID: <code>${data.id}</code>) and set <code>is_active = true</code> and <code>status = 'approved'</code> to publish this farm.</p>`,
-      });
+
+      // 1. Send review email with CTA button to SAGANA Platform Admin
+      await sendAdminFarmRegistrationEmail(
+        data,
+        { actionUrl },
+        emailClient,
+      );
+
+      // 2. Send "Request Received" confirmation email to the Farm Owner
+      await sendFarmOwnerPendingEmail(data, emailClient);
     } catch (emailErr) {
-      console.error("Farm registration admin alert failed:", emailErr);
+      console.error("Farm registration email dispatch failed:", emailErr);
     }
 
     return Response.json({ saved: true, farmId: data.id });
