@@ -176,6 +176,32 @@ export function appendFarmChatMessage(messages, text, id) {
   return [...messages, { id, text: trimmedText }];
 }
 
+export function getFarmChatReply(response, { email = "", question = "" } = {}) {
+  if (response?.status === "answered" && typeof response.answer === "string") {
+    return { pendingQuestion: null, reply: response.answer };
+  }
+  if (response?.status === "needs_email") {
+    return {
+      pendingQuestion: question,
+      reply:
+        "I can't answer that from this farm's listing. Type your email below and I'll send your question to the farm so they can reply.",
+    };
+  }
+  if (response?.status === "escalated") {
+    return {
+      pendingQuestion: null,
+      reply:
+        response.emailSent === false
+          ? "Thanks! We saved your question and will pass it to the farm."
+          : "Thanks! Your question was sent to the farm. They can reply to the email you provided.",
+    };
+  }
+  return {
+    pendingQuestion: null,
+    reply: response?.error || "Sorry, something went wrong. Please try again.",
+  };
+}
+
 export function filterFarmsByQuery(farms, query) {
   const list = asFarmList(farms);
   const normalizedQuery = typeof query === "string" ? query.trim().toLowerCase() : "";

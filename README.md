@@ -45,6 +45,8 @@ Fill in `.env.local` with values from Supabase Project Settings and Brevo:
 | `RESERVATION_FROM_EMAIL` | Verified sender address in Brevo |
 | `APP_BASE_URL` | Public site origin, e.g. `http://localhost:3000` locally |
 | `RATE_LIMIT_SECRET` | Random server-only secret of at least 32 bytes; generate with `openssl rand -hex 32` |
+| `OPENROUTER_API_KEY` | OpenRouter server-only API key for farm chat answers |
+| `OPENROUTER_MODEL` | Optional OpenRouter model ID; defaults to `openrouter/free` |
 
 Never commit `.env.local`, expose the service-role key to browser code, or put
 real credentials in documentation or chat.
