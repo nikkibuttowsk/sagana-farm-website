@@ -311,3 +311,212 @@ export function createFarmQuestionMessage({ farmName, question, visitorEmail }, 
     }),
   };
 }
+
+function formatCrops(crops) {
+  if (Array.isArray(crops)) return crops.join(", ");
+  return crops || "Not specified";
+}
+
+function farmRegistrationDetails(farm) {
+  return [
+    `Farm: ${farm.name}`,
+    `Province: ${farm.province || "N/A"}`,
+    `Address: ${farm.location}`,
+    `Owner Email: ${farm.admin_email}`,
+    `Crops: ${formatCrops(farm.crops)}`,
+    `Season: ${farm.season || "all"}`,
+    farm.video_url ? `Video: ${farm.video_url}` : null,
+    `Farm ID: ${farm.id}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+export function createAdminFarmRegistrationMessage(
+  farm,
+  { actionUrl, from, to },
+) {
+  const details = farmRegistrationDetails(farm);
+
+  const rows = [
+    ["Farm", farm.name],
+    ["Province", farm.province || "N/A"],
+    ["Address", farm.location],
+    ["Owner Email", farm.admin_email],
+    ["Crops", formatCrops(farm.crops)],
+    ["Season", farm.season || "all"],
+    ...(farm.video_url ? [["Video", farm.video_url]] : []),
+    ["Farm ID", farm.id],
+  ];
+
+  const bodyHtml = `
+    <p style="margin:0 0 4px;font-size:15px;line-height:1.5;color:#1f2e23;">
+      A new fruit farm registration has been submitted and is waiting for administrator review.
+    </p>
+    ${renderDetailsTable(rows)}
+    ${
+      actionUrl
+        ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:8px;">
+            <tr>
+              <td align="center">
+                <a href="${escapeHtml(actionUrl)}" style="display:inline-block;width:100%;box-sizing:border-box;padding:13px 20px;background-color:#173d2b;color:#ffffff;font-size:14px;font-weight:700;text-align:center;text-decoration:none;border-radius:10px;">
+                  Review &amp; Approve or Reject Farm &rarr;
+                </a>
+              </td>
+            </tr>
+          </table>`
+        : ""
+    }
+    <div style="margin-top:16px;padding:12px 14px;background-color:#f8faf7;border:1px solid #e3ebe1;border-radius:8px;font-size:12px;line-height:1.5;color:#5c6b5f;">
+      <strong>Manual Supabase Fallback:</strong> Open the <code>farms</code> table (ID: <code>${escapeHtml(farm.id)}</code>) and set <code>is_active = true</code> and <code>status = 'approved'</code> to publish this farm.
+    </div>
+  `;
+
+  return {
+    from,
+    to,
+    replyTo: farm.admin_email,
+    subject: `New farm registration: ${farm.name} (${farm.province || farm.location})`,
+    text: `${details}\n\n${actionUrl ? `Review and decide: ${actionUrl}\n\n` : ""}Open your Supabase farms table (ID: ${farm.id}) and set is_active = true and status = 'approved' to publish this farm.`,
+    html: wrapEmailLayout({
+      eyebrow: "SAGANA ADMIN • NEW FARM",
+      title: "New Farm Registration",
+      subtitle: `${farm.name} • ${farm.province || farm.location}`,
+      bodyHtml,
+      footerNote:
+        "This approval link is single-use and expires automatically. No changes are made until you confirm on the review page.",
+    }),
+  };
+}
+
+export function createFarmOwnerPendingMessage(farm, { from }) {
+  const title = `We received your farm registration for ${farm.name}`;
+  const text = [
+    `Hello,`,
+    `Thank you for registering ${farm.name} (${farm.location}) on SAGANA.`,
+    `Farm ID: ${farm.id}`,
+    `Status: Pending Administrator Review`,
+    `We will notify you at this email address once your farm listing has been reviewed and published.`,
+  ].join("\n\n");
+
+  const bodyHtml = `
+    <p style="margin:0 0 12px;font-size:15px;line-height:1.55;color:#1f2e23;">
+      Hello,
+    </p>
+    <p style="margin:0 0 6px;font-size:14px;line-height:1.55;color:#4a5a4e;">
+      Thank you for submitting <strong>${escapeHtml(farm.name)}</strong> to SAGANA! Your farm profile is currently <strong>pending administrator review</strong> before going live to visitors.
+    </p>
+    ${renderDetailsTable([
+      ["Farm ID", farm.id],
+      ["Farm Name", farm.name],
+      ["Province", farm.province || "N/A"],
+      ["Address", farm.location],
+      ["Crops", formatCrops(farm.crops)],
+      ["Status", "Pending Review"],
+    ])}
+    <div style="padding:14px 16px;background-color:#e8f2e4;border-radius:10px;font-size:13px;line-height:1.5;color:#173d2b;">
+      <strong>What happens next?</strong> Our team will verify your farm details and notify you via email as soon as your listing is published on SAGANA.
+    </div>
+  `;
+
+  return {
+    from,
+    to: farm.admin_email,
+    subject: title,
+    text,
+    html: wrapEmailLayout({
+      eyebrow: "SAGANA • REGISTRATION RECEIVED",
+      title: "Your farm listing is in review",
+      subtitle: farm.name,
+      bodyHtml,
+      footerNote:
+        "Please keep your Farm ID handy if you need to update your submission details.",
+    }),
+  };
+}
+
+export function createFarmOwnerStatusMessage(
+  farm,
+  status,
+  { farmUrl } = {},
+  { from },
+) {
+  if (status !== "approved" && status !== "rejected") {
+    throw new TypeError("Farm status must be approved or rejected.");
+  }
+
+  const approved = status === "approved";
+  const subject = approved
+    ? `Farm Approved! ${farm.name} is now live on SAGANA`
+    : `Update on your farm registration for ${farm.name}`;
+
+  const text = [
+    `Hello,`,
+    `Your farm registration for ${farm.name} (${farm.location}) has been ${status}.`,
+    approved && farmUrl ? `View your live listing: ${farmUrl}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const bodyHtml = approved
+    ? `
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;color:#1f2e23;">
+        Great news!
+      </p>
+      <p style="margin:0 0 6px;font-size:14px;line-height:1.55;color:#4a5a4e;">
+        Your farm listing for <strong>${escapeHtml(farm.name)}</strong> has been <strong>approved</strong> and is now live for visitors to discover and book visits on SAGANA.
+      </p>
+      ${renderDetailsTable([
+        ["Farm Name", farm.name],
+        ["Province", farm.province || "N/A"],
+        ["Address", farm.location],
+        ["Crops", formatCrops(farm.crops)],
+        ["Status", "Approved & Live"],
+      ])}
+      ${
+        farmUrl
+          ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+              <tr>
+                <td align="center">
+                  <a href="${escapeHtml(farmUrl)}" style="display:inline-block;width:100%;box-sizing:border-box;padding:13px 20px;background-color:#173d2b;color:#ffffff;font-size:14px;font-weight:700;text-align:center;text-decoration:none;border-radius:10px;">
+                    View Live Farm Listing &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>`
+          : ""
+      }
+    `
+    : `
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;color:#1f2e23;">
+        Hello,
+      </p>
+      <p style="margin:0 0 6px;font-size:14px;line-height:1.55;color:#4a5a4e;">
+        Unfortunately, we could not approve the farm registration for <strong>${escapeHtml(farm.name)}</strong> at this time.
+      </p>
+      ${renderDetailsTable([
+        ["Farm Name", farm.name],
+        ["Address", farm.location],
+        ["Status", "Declined"],
+      ])}
+      <p style="margin:0;font-size:13px;line-height:1.5;color:#5c6b5f;">
+        Please reply to this email if you need clarification or wish to submit updated information.
+      </p>
+    `;
+
+  return {
+    from,
+    to: farm.admin_email,
+    subject,
+    text,
+    html: wrapEmailLayout({
+      eyebrow: approved ? "SAGANA • FARM PUBLISHED" : "SAGANA • REGISTRATION UPDATE",
+      title: approved ? "Welcome to SAGANA!" : "Farm registration update",
+      subtitle: farm.name,
+      bodyHtml,
+      footerNote: approved
+        ? "Visitors can now view your farm profile and request visit reservations."
+        : "Thank you for your interest in partnering with SAGANA.",
+    }),
+  };
+}

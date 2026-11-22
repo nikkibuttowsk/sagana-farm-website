@@ -7,6 +7,9 @@ import {
   createFarmQuestionMessage,
   createVisitorPendingMessage,
   createVisitorStatusMessage,
+  createAdminFarmRegistrationMessage,
+  createFarmOwnerPendingMessage,
+  createFarmOwnerStatusMessage,
 } from "./templates.mjs";
 
 export function createEmailClient() {
@@ -76,6 +79,54 @@ export async function sendVisitorStatusEmail(
     reservation,
     status,
     { ticketUrl, qrDataUrl },
+    { from: RESERVATION_FROM_EMAIL },
+  );
+
+  await sendMessage(emailClient, message);
+}
+
+export async function sendAdminFarmRegistrationEmail(
+  farm,
+  { actionUrl },
+  emailClient,
+) {
+  const { FARM_ADMIN_EMAIL, RESERVATION_FROM_EMAIL } = requireServerEnv([
+    "FARM_ADMIN_EMAIL",
+    "RESERVATION_FROM_EMAIL",
+  ]);
+  const message = createAdminFarmRegistrationMessage(farm, {
+    actionUrl,
+    from: RESERVATION_FROM_EMAIL,
+    to: FARM_ADMIN_EMAIL,
+  });
+
+  await sendMessage(emailClient, message);
+}
+
+export async function sendFarmOwnerPendingEmail(farm, emailClient) {
+  const { RESERVATION_FROM_EMAIL } = requireServerEnv([
+    "RESERVATION_FROM_EMAIL",
+  ]);
+  const message = createFarmOwnerPendingMessage(farm, {
+    from: RESERVATION_FROM_EMAIL,
+  });
+
+  await sendMessage(emailClient, message);
+}
+
+export async function sendFarmOwnerStatusEmail(
+  farm,
+  status,
+  { farmUrl } = {},
+  emailClient,
+) {
+  const { RESERVATION_FROM_EMAIL } = requireServerEnv([
+    "RESERVATION_FROM_EMAIL",
+  ]);
+  const message = createFarmOwnerStatusMessage(
+    farm,
+    status,
+    { farmUrl },
     { from: RESERVATION_FROM_EMAIL },
   );
 
