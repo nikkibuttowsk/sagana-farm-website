@@ -243,14 +243,11 @@ GitHub Copilot was used as an AI-assisted development tool to support selected c
 
 ## Development Team
 
-**HCI 321 – Human Computer Interaction**  
-**Group 06 · CS 3104**
-
-| Student Number | Developer |
+| Developer | GitHub |
 |---|---|
-| 24-04063 | Nikki C. Limboc |
-| 24-01351 | Julian Carlo C. Magbuhat |
-| 24-06089 | Christine Nicole P. Miranda |
+| Nikki C. Limboc | [![GitHub](https://img.shields.io/badge/GitHub-NIKKIBUTTOWSK-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nikkibuttowsk) |
+| Julian Carlo C. Magbuhat | [![GitHub](https://img.shields.io/badge/GitHub-JULIANCARLOMAGBUHAT-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/juliancarlomagbuhat) |
+| Christine Nicole P. Miranda | [![GitHub](https://img.shields.io/badge/GitHub-TININTINTI-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/tinintinti) |
 
 ---
 
