@@ -112,35 +112,55 @@ classDiagram
     Farm "1" --> "0..*" FarmQuestion : receives
 ```
 
-### Main User Flowchart
+### Visitor Reservation Flow
+
+The visitor journey is shown separately from farm-owner registration so the diagram remains readable at different screen sizes.
 
 ```mermaid
 flowchart TD
-    A([Visitor opens SAGANA]) --> B[Browse or search farms]
-    B --> C[Select a farm]
-    C --> D[Review farm details, photos, videos, and location]
-    D --> E{What would the visitor like to do?}
+    A([Start]) --> B["Browse or search farms"]
+    B --> C["Select a farm"]
+    C --> D["View farm details, photos, videos and location"]
+    D --> E{"Request a visit?"}
+    E -->|No| B
+    E -->|Yes| F["Choose visit date and time"]
+    F --> G["Enter visitor details"]
+    G --> H["Submit reservation request"]
+    H --> I["Reservation saved as Pending"]
+    I --> J["Administrator reviews request"]
+    J --> K{"Decision"}
+    K -->|Approve| L["Generate QR ticket and email visitor"]
+    K -->|Reject| M["Send reservation status update"]
+    L --> N([End])
+    M --> N
+```
 
-    E -->|Ask a question| F[Submit a farm question]
-    F --> G{Can the AI answer?}
-    G -->|Yes| H[Show the answer to the visitor]
-    G -->|No| I[Request visitor email]
-    I --> J[Save the question and notify the farm contact]
+### Farm Question Flow
 
-    E -->|Request a visit| K[Choose visit date and time slot]
-    K --> L[Enter visitor and guest details]
-    L --> M[Submit reservation request]
-    M --> N[Save reservation as Pending]
-    N --> O[Administrator reviews the request]
-    O --> P{Decision}
-    P -->|Approve| Q[Generate QR ticket and email visitor]
-    P -->|Reject| R[Email reservation status]
+```mermaid
+flowchart TD
+    A([Visitor views a farm]) --> B["Submit a farm question"]
+    B --> C{"Can AI answer?"}
+    C -->|Yes| D["Show answer to visitor"]
+    C -->|No| E["Collect visitor email"]
+    E --> F["Save inquiry in the system"]
+    F --> G["Notify the farm contact"]
+    D --> H([End])
+    G --> H
+```
 
-    S([Farm owner submits a farm listing]) --> T[Save listing as Pending and inactive]
-    T --> U[Administrator reviews the farm listing]
-    U --> V{Decision}
-    V -->|Approve| W[Activate farm for public discovery]
-    V -->|Reject| X[Notify farm owner of the decision]
+### Farm Registration Flow
+
+```mermaid
+flowchart TD
+    A([Farm owner starts registration]) --> B["Submit farm details"]
+    B --> C["Save listing as Pending and inactive"]
+    C --> D["Administrator reviews listing"]
+    D --> E{"Decision"}
+    E -->|Approve| F["Activate farm for public discovery"]
+    E -->|Reject| G["Notify farm owner"]
+    F --> H([End])
+    G --> H
 ```
 
 ## Run Locally
