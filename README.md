@@ -1,106 +1,239 @@
-# Sagana Farm
+<p align="center">
+  <img src="public/images/sagana-logo.jpg" width="180" alt="SAGANA logo">
+</p>
 
-Sagana Farm is a Next.js website with a Supabase-backed farm visit reservation
-flow. Visitors choose an active farm and time slot, submit their contact details
-and guest count, and wait for administrator review. The administrator receives
-an email with expiring approval/rejection links. Approved reservations receive
-a QR ticket by email; rejected requests receive a status email.
+<h1 align="center">SAGANA</h1>
 
-Farm availability and capacity are reviewed manually by the administrator.
-Time-slot labels are configured per farm in Supabase and use the
-`Asia/Manila` timezone.
+<p align="center"><i>Discover. Explore. Experience.</i></p>
 
-## Requirements
+<p align="center">
+  A farm tourism platform that helps travelers discover local farms and request visits across the Philippines.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16.4.6-black?style=for-the-badge&logo=next.js" alt="Next.js">
+  <img src="https://img.shields.io/badge/React-19.3.0-149eca?style=for-the-badge&logo=react" alt="React">
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=for-the-badge&logo=supabase" alt="Supabase">
+  <img src="https://img.shields.io/badge/JavaScript-ES6+-f7df1e?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+</p>
+
+---
+
+## Overview
+
+**SAGANA** is a web-based farm tourism platform that brings farm discovery and visit requests into one place. Visitors can explore farms, learn about seasonal produce and activities, preview destinations through photos and videos, find locations on a map, and submit a visit request. Farm owners can submit their farm details for review and listing.
+
+SAGANA aims to make farm experiences easier to discover while helping local farms increase their online visibility.
+
+## Key Features
+
+- **Farm discovery** – Browse and search farm listings, including seasonal and featured destinations.
+- **Map and nearby farms** – Explore farm locations on an interactive map and find farms near your location.
+- **Farm profiles** – View farm descriptions, crops, seasons, operating details, photos, videos, and directions.
+- **Farm questions** – Ask questions about a farm through the on-page chat feature, with AI-assisted responses configured through OpenRouter.
+- **Visit reservations** – Submit a visit request by selecting a farm, date, time slot, and visitor details. No visitor account is required.
+- **Farm registration** – Submit a farm listing for administrator review.
+- **Reservation updates and digital tickets** – Administrators review reservation requests; approved reservations receive a QR-code ticket by email.
+
+> **Booking note:** Submitting a reservation is a request, not an instant confirmation. The reservation remains pending until an administrator reviews it.
+
+## How It Works
+
+**For visitors:** Discover a farm → Review its details → Choose a date and time → Submit visitor details → Receive an update after administrator review.
+
+**For farm owners:** Submit farm information → Wait for administrator review → An approved farm can be published in the directory.
+
+## Technology
+
+| Area | Technology |
+|---|---|
+| Web framework | Next.js 16 |
+| User interface | React 19 |
+| Language | JavaScript |
+| Database and backend services | Supabase (PostgreSQL) |
+| Interactive map | Leaflet with OpenStreetMap tiles |
+| Email notifications | Brevo |
+| AI-assisted farm chat | OpenRouter |
+| QR-code tickets | `qrcode` |
+
+## System Diagrams
+
+The diagrams below provide a simplified view of SAGANA's core data relationships and main user journeys. They focus on the parts most useful for understanding the system without reproducing every implementation detail.
+
+### UML Class Diagram
+
+This class diagram summarizes the main farm, time-slot, reservation, and question records used by the application. A reservation belongs to one farm and one time slot; a farm can have multiple time slots, reservations, and questions.
+
+```mermaid
+classDiagram
+    class Farm {
+        +UUID id
+        +String name
+        +String location
+        +String province
+        +String description
+        +String[] crops
+        +Boolean is_active
+        +Integer max_party_size
+    }
+
+    class FarmTimeSlot {
+        +UUID id
+        +UUID farm_id
+        +String label
+        +Boolean is_active
+        +Integer sort_order
+    }
+
+    class Reservation {
+        +UUID id
+        +UUID farm_id
+        +UUID time_slot_id
+        +String visitor_name
+        +String visitor_email
+        +String visitor_phone
+        +Integer guest_count
+        +Date visit_date
+        +String status
+    }
+
+    class FarmQuestion {
+        +UUID id
+        +UUID farm_id
+        +String question
+        +String visitor_email
+        +String status
+        +String admin_answer
+    }
+
+    Farm "1" --> "0..*" FarmTimeSlot : offers
+    Farm "1" --> "0..*" Reservation : receives
+    FarmTimeSlot "1" --> "0..*" Reservation : selected for
+    Farm "1" --> "0..*" FarmQuestion : receives
+```
+
+### Main User Flowchart
+
+```mermaid
+flowchart TD
+    A([Visitor opens SAGANA]) --> B[Browse or search farms]
+    B --> C[Select a farm]
+    C --> D[Review farm details, photos, videos, and location]
+    D --> E{What would the visitor like to do?}
+
+    E -->|Ask a question| F[Submit a farm question]
+    F --> G{Can the AI answer?}
+    G -->|Yes| H[Show the answer to the visitor]
+    G -->|No| I[Request visitor email]
+    I --> J[Save the question and notify the farm contact]
+
+    E -->|Request a visit| K[Choose visit date and time slot]
+    K --> L[Enter visitor and guest details]
+    L --> M[Submit reservation request]
+    M --> N[Save reservation as Pending]
+    N --> O[Administrator reviews the request]
+    O --> P{Decision}
+    P -->|Approve| Q[Generate QR ticket and email visitor]
+    P -->|Reject| R[Email reservation status]
+
+    S([Farm owner submits a farm listing]) --> T[Save listing as Pending and inactive]
+    T --> U[Administrator reviews the farm listing]
+    U --> V{Decision}
+    V -->|Approve| W[Activate farm for public discovery]
+    V -->|Reject| X[Notify farm owner of the decision]
+```
+
+## Run Locally
+
+### Requirements
 
 - Node.js 20 or newer
+- npm
 - A Supabase project
-- A Brevo account, API key, and verified sender address
+- A Brevo account with an API key and verified sender address
+- An OpenRouter API key for AI-assisted farm chat (optional)
 
-## Local setup
+### Setup
 
-Install dependencies and start the development server:
+1. **Clone the repository and install dependencies.**
 
-```bash
-npm ci
-cp .env.example .env.local
-npm run dev
-```
+   ```bash
+   git clone <repository-url>
+   cd sagana-farm-website-main
+   npm ci
+   ```
 
-In Supabase, apply every SQL file in `supabase/migrations/` in filename order
-using the SQL Editor or your normal migration workflow. Add farm rows to
-`farms`, then add each farm's visitor-facing time-slot labels to
-`farm_time_slots`. Mark records `is_active = true` when they should appear on
-the site. Optional `max_party_size` limits one reservation request; it is not
-a slot-capacity setting.
+2. **Create the environment file.** Copy `.env.example` to `.env.local` and fill in the required values.
 
-Fill in `.env.local` with values from Supabase Project Settings and Brevo:
+   ```bash
+   cp .env.example .env.local
+   ```
 
-| Variable | Value |
-| --- | --- |
+   On Windows Command Prompt:
+
+   ```bat
+   copy .env.example .env.local
+   ```
+
+3. **Configure Supabase.** Apply the SQL migrations in `supabase/migrations/` in filename order. Add farm records and their visitor-facing time slots. Set `is_active = true` for farms that should appear publicly.
+
+4. **Start the development server.**
+
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000).
+
+### Environment Variables
+
+| Variable | Purpose |
+|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service-role key; server-only |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase public/anonymous key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase service-role key |
 | `BREVO_API_KEY` | Brevo transactional email API key |
-| `FARM_ADMIN_EMAIL` | Address that receives reservation requests |
+| `FARM_ADMIN_EMAIL` | Administrator email for reservation and farm-related notifications |
 | `RESERVATION_FROM_EMAIL` | Verified sender address in Brevo |
-| `APP_BASE_URL` | Public site origin, e.g. `http://localhost:3000` locally |
-| `RATE_LIMIT_SECRET` | Random server-only secret of at least 32 bytes; generate with `openssl rand -hex 32` |
-| `OPENROUTER_API_KEY` | OpenRouter server-only API key for farm chat answers |
-| `OPENROUTER_MODEL` | Optional OpenRouter model ID; defaults to `openrouter/free` |
+| `APP_BASE_URL` | Application origin, such as `http://localhost:3000` |
+| `RATE_LIMIT_SECRET` | Server-side secret used by request rate limiting |
+| `OPENROUTER_API_KEY` | OpenRouter API key for AI-assisted farm chat |
+| `OPENROUTER_MODEL` | Optional model ID; defaults to `openrouter/free` |
 
-Never commit `.env.local`, expose the service-role key to browser code, or put
-real credentials in documentation or chat.
+Keep credentials in `.env.local` or your hosting provider's environment settings. **Never commit secrets or expose `SUPABASE_SERVICE_ROLE_KEY` in client-side code.**
 
-## Security and reservation behavior
+## Useful Commands
 
-- Supabase row-level security allows public reads of active farms and slots
-  only. Reservation rows and approval functions are restricted to the
-  server-side service role.
-- The server validates submitted fields and enforces the configured per-farm
-  guest maximum. A reservation is saved as `pending` before the administrator
-  notification is sent.
-- The reservation endpoint allows up to five requests per client IP in 15
-  minutes and three per normalized email address per day. Only keyed hashes
-  are stored, and expired limiter entries are removed during subsequent
-  submissions. Configure the hosting proxy to overwrite `X-Forwarded-For`
-  with one trusted client IP; requests without a single valid IP are rejected.
-- Administrator action links expire after 72 hours and can decide a pending
-  reservation only once. The ticket link exposes only farm, date, time slot,
-  guest count, and status; it contains no contact details.
-- Ticket tokens expire at the end of the visit date plus one day. A
-  retry-email link can issue a replacement QR token for an approved
-  reservation for up to seven days, no more than once per minute.
-- Ticket URLs are bearer links: anyone who has the URL can view the limited
-  arrival details. Visitors should keep ticket links private.
-- If an administrator notification fails after the request is saved, the site
-  reports the saved reservation reference and asks the visitor not to submit
-  again. Email delivery failures never imply that the reservation was rolled
-  back.
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start the local development server |
+| `npm run build` | Build the application for production |
+| `npm run start` | Run the production build |
+| `npm run lint` | Check code with ESLint |
+| `npm test` | Run automated tests |
+| `npm run test:integration` | Run integration tests |
 
-## Checks
+---
 
-```bash
-npm test
-npm run test:integration
-npm run lint
-npm run build
-```
+## AI Assistance Disclosure
 
-The database integration tests are skipped unless Supabase test credentials are
-provided. To run them against a local Supabase project, initialize and start the
-Supabase CLI in the repository, save `supabase status -o env` output to a
-temporary file, then run:
+GitHub Copilot was used as an AI-assisted development tool to support selected coding, refinement, and debugging tasks. The development team reviewed and adapted its suggestions and remains responsible for the final implementation. SAGANA's AI-assisted farm chat is a separate application feature powered by OpenRouter.
 
-```bash
-SUPABASE_TEST_STATUS_FILE=/tmp/sagana-supabase-status.env npm run test:integration
-```
+---
 
-Stop the local project with `supabase stop` after testing, and do not commit the
-status file.
+## Development Team
 
-## Deploying
+**HCI 321 – Human Computer Interaction**  
+**Group 06 · CS 3104**
 
-Configure all required environment variables in the hosting provider, use the
-production site origin for `APP_BASE_URL`, apply the migration, add active
-farms/time slots, and verify the Brevo sender before accepting real
-reservations.
+| Student Number | Developer |
+|---|---|
+| 24-04063 | Nikki C. Limboc |
+| 24-01351 | Julian Carlo C. Magbuhat |
+| 24-06089 | Christine Nicole P. Miranda |
+
+---
+
+<p align="center">
+  <b>SAGANA connects people to local farms, seasonal harvests, and meaningful countryside experiences.</b>
+</p>
