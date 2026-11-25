@@ -243,7 +243,7 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
           {hasMany && (
             <span className="slide-counter">{current + 1} / {slides.length}</span>
           )}
-          {currentIsVideo && <span className="slide-badge">Video Walkthrough</span>}
+          {currentIsVideo && <span className="slide-badge"></span>}
 
           {hasMany && (
             <>
