@@ -72,7 +72,7 @@ test("acceptsValidRequestAndNormalizesContactDetails", () => {
   assert.deepEqual(result.value, {
     visitorName: "Maria Santos",
     visitorEmail: "maria@example.com",
-    visitorPhone: "+63 (917) 123-4567",
+    visitorPhone: "+639171234567",
     farmId,
     timeSlotId,
     guestCount: 2,

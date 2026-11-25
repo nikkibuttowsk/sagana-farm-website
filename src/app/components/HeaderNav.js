@@ -8,7 +8,6 @@ export default function HeaderNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  // close the menu after navigating to another page
   useEffect(() => {
     setOpen(false);
   }, [pathname]);

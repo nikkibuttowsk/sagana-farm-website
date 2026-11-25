@@ -2,6 +2,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import "./homepage.css";
+import ScrollTop from "./components/ScrollTop";
+import AnchorScroll from "./components/AnchorScroll";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +24,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ScrollTop />
+        <AnchorScroll />
+        {children}
+      </body>
     </html>
   );
 }

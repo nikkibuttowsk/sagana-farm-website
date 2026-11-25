@@ -18,14 +18,14 @@ const EMPTY_FORM = {
   longitude: "",
   image_url: "",
   video_url: "",
-  website: "", // spam trap
+  website: "", 
 };
 
 export default function FarmRegisterForm() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
-  const [submitted, setSubmitted] = useState(null); // { name, email }
+  const [submitted, setSubmitted] = useState(null); 
   const [submitting, setSubmitting] = useState(false);
 
   const set = (field) => (e) =>

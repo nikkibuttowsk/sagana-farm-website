@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getFarmChatReply } from "@/lib/homepage.mjs";
 
 const MONTHS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
 
@@ -150,10 +149,21 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
 
       if (!res.ok) {
         reply(data.error || "Sorry, something went wrong. Please try again.");
-      } else {
-        const chatReply = getFarmChatReply(data, { email, question });
-        setPendingQuestion(chatReply.pendingQuestion);
-        reply(chatReply.reply);
+      } else if (data.status === "answered") {
+        setPendingQuestion(null);
+        reply(data.answer);
+      } else if (data.status === "needs_email") {
+        setPendingQuestion(question);
+        reply(
+          "I can't answer that from this farm's listing. Type your email below and I'll send your question to the farm so they can reply.",
+        );
+      } else if (data.status === "escalated") {
+        setPendingQuestion(null);
+        reply(
+          data.emailSent === false
+            ? "Thanks! We saved your question and will pass it to the farm."
+            : `Thanks! Your question was sent to the farm. They'll reply to ${email}.`,
+        );
       }
     } catch {
       reply("Network error. Please check your connection and try again.");
@@ -233,7 +243,7 @@ export default function FarmPopup({ farm, videoUrl, imageUrls, prevId, nextId })
           {hasMany && (
             <span className="slide-counter">{current + 1} / {slides.length}</span>
           )}
-          {currentIsVideo && <span className="slide-badge">Video Walkthrough</span>}
+          {currentIsVideo && <span className="slide-badge"></span>}
 
           {hasMany && (
             <>

@@ -152,7 +152,7 @@ export default async function HomePage() {
             <p className="eyebrow">Rooted in local experiences</p>
             <h2>About SAGANA</h2>
             <p>
-              SAGANA connects travelers and fruit lovers to authentic local
+              SAGANA connects travelers and farm lovers to authentic local
               agritourism experiences across the Philippines.
             </p>
           </div>

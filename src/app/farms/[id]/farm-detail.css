@@ -57,13 +57,11 @@ html.farm-open .farm-page-container {
     to   { opacity: 1; transform: none; }
 }
 
-/* closing: fade and shrink */
 html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease forwards; }
 @keyframes farmClose {
     to { opacity: 0; transform: translateY(14px) scale(0.98); }
 }
 
-/* ---------- Left: photos / video ---------- */
 .farm-primary-content,
 .media-carousel-container { display: contents; }
 .carousel-wrapper {
@@ -115,7 +113,6 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
 .slide-counter { left: 1rem; }
 .slide-badge { right: 1rem; }
 
-/* dots pill, bottom centre of the photo */
 .farm-page-container .carousel-dots {
     position: absolute;
     left: calc(var(--media) / 2);
@@ -129,7 +126,6 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
     backdrop-filter: blur(8px);
     border-radius: var(--radius-pill);
 }
-/* on a video slide, lift the dots above the player's control bar */
 .farm-page-container:has(.carousel-slide.active[data-type="video"]) .carousel-dots,
 .farm-page-container:has(.carousel-slide.active[data-type="youtube"]) .carousel-dots { bottom: 4.5rem; }
 .farm-page-container .carousel-dots span {
@@ -141,7 +137,6 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
 }
 .farm-page-container .carousel-dots span.is-active { background: var(--color-secondary); transform: scale(1.25); }
 
-/* big round arrows OUTSIDE the pop-up: previous / next farm */
 .farm-nav {
     position: absolute;
     top: 50%;
@@ -165,8 +160,6 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
 .farm-nav.prev { left: -4.25rem; }
 .farm-nav.next { right: -4.25rem; }
 
-/* small arrows INSIDE the picture: previous / next photo or video.
-   Same position on every slide (photo, video, YouTube). */
 .media-arrow {
     position: absolute;
     top: 50%;
@@ -225,7 +218,6 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
 }
 .farm-close:hover { background: var(--color-secondary); color: var(--white); }
 
-/* mobile-only farm switch row (hidden on desktop) */
 .farm-switch-row { display: none; }
 
 .farm-type {
@@ -251,23 +243,26 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
 .sidebar-card > hr { margin: 0.9rem 0; border: 0; border-top: 1px solid var(--border); }
 .sidebar-card > p { margin-top: 0; font-size: 0.9rem; color: var(--text); }
 
-/* info rows: label | value */
 .info-list {
     display: grid;
     grid-template-columns: 5.5rem 1fr;
+    grid-auto-rows: minmax(3rem, auto);
     margin: 0 0 1.25rem;
     font-size: 0.88rem;
 }
 .info-list dt,
 .info-list dd {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     margin: 0;
-    padding: 0.7rem 0;
+    padding: 0.5rem 0;
     border-top: 1px solid var(--border);
 }
 .info-list dt { padding-right: 1rem; font-weight: 600; color: var(--color-primary); }
 .info-list dd { color: var(--text); min-width: 0; overflow-wrap: anywhere; }
 
-/* Contact row: phone link, kept on one line */
 .info-list .contact-link {
     font-weight: 600;
     color: var(--color-secondary);
@@ -295,6 +290,17 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
     text-transform: uppercase;
     color: var(--color-primary);
 }
+
+.season-chips,
+.activity-tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.season-chips li,
+.activity-tags li { list-style: none; }
+.season-chips li::marker,
+.activity-tags li::marker { content: none; }
 
 /* harvest season months */
 .season-chips {
@@ -387,7 +393,6 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
 }
 .chat-input-form .btn { padding: 0.6rem 1.1rem; }
 
-/* bottom bar: price + Book now */
 .farm-cta-bar {
     display: flex;
     align-items: center;
@@ -412,7 +417,6 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
 .farm-cta-bar .price span { font-size: 0.82rem; font-weight: 400; color: var(--muted); }
 .farm-cta-bar .btn { padding: 0.75rem 2rem; }
 
-/* ---------- Tablets / phones: full-screen sheet ---------- */
 @media (max-width: 900px) {
     .farm-page-container {
         inset: 0;
@@ -431,8 +435,6 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
     .farm-type { margin-right: 0; }
     .farm-close { background: rgba(255, 255, 255, 0.9); }
 
-    /* one pair of arrows on the photo: round farm arrows are hidden,
-       farm switching uses the labelled buttons in the details */
     .farm-nav { display: none; }
 
     .farm-switch-row {
@@ -453,13 +455,10 @@ html.farm-open .farm-page-container.closing { animation: farmClose 0.25s ease fo
     }
     .farm-switch-row button:active { background: var(--color-tertiary); }
 
-    /* photo arrows: one fixed spot on every slide */
     .media-arrow { top: 140px; width: 34px; height: 34px; }
     .media-arrow.prev { left: 0.6rem; }
     .media-arrow.next { left: auto; right: 0.6rem; }
 
-    /* dots: fixed pill near the bottom of the 280px photo area (top only,
-       so bottom can never stretch it). Lifted above video controls. */
     .farm-page-container .carousel-dots {
         left: 50%;
         bottom: auto;
